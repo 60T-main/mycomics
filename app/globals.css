@@ -2,25 +2,156 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  --font-main: 'MainFont';
+  --color-primary-font: black;
+  --color-secondary-font: #858585;
+  --color-primary-blue: #004684;
+  --color-primary-red: #ee1b2e;
+  --padding-x-medium: 8rem;
+  --padding-x-large: 12rem;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+} */
+
+
+
+@font-face {
+  font-family: 'MainFont';
+  src: url('../public/fonts/mainFont.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
+    .inline-font {
+      font-feature-settings: "case";
+    }
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'MainFont', sans-serif;
+  color: var(--color-primary-font);
+}
+
+.h1, h1 {
+  @apply text-xl md:text-xl xl:text-2xl leading-tight md:text-3xl;
+}
+
+.h2,h2 {
+  @apply text-lg font-bold md:text-2xl;
+}
+
+.h3, h3 {
+  @apply text-base md:text-lg;
+}
+
+.h4, h4 {
+  @apply text-base;
+}
+
+.a, a {
+  @apply !no-underline text-white;
+}
+
+.p, p {
+  @apply text-sm md:text-base m-0 p-0;
+}
+
+@layer utilities {
+
+}
+
+@layer components {
+
+  header{
+    @apply flex justify-between items-center border-b-2 border-black px-12 min-h-20 bg-[#ffdf11]; 
+  }
+
+  header i{
+    @apply text-black text-3xl;
+  }
+
+  header img {
+    @apply w-35 z-999999;
+  }
+
+  .landing-banner-section{
+    @apply grid grid-rows-[30vh_20vh_20vh] md:grid-rows-[40vh_30vh_20vh] lg:grid-rows-[50vh_25vh_20vh]  grid-cols-3;
+  }
+  .landing-banner-section article{
+    @apply border-b-2 border-black;
+  }
+
+  .landing-row-1{
+    @apply row-start-1 row-end-2 col-span-3 flex flex-col justify-center gap-4 items-center relative overflow-hidden md:justify-start md:py-6;
+  }
+  .landing-row-1::before, .landing-row-1::after{
+      content: "";
+        position: absolute;
+        top: 0;
+        width: 360px;
+        /* fixed width */
+        height: 100%;
+        background-repeat: no-repeat;
+        background-size: contain;
+        pointer-events: none;
+  }
+
+    .landing-row-1::before {
+      left: 0;
+      background-image: url("/bg-left.png");
+      background-position: left center;
+    }
+  
+    .landing-row-1::after {
+      right: 0;
+      background-image: url("/bg-right.png");
+      background-position: right center;
+    }
+
+
+    .landing-row-1 h1{
+      @apply flex justify-center items-center overflow-hidden p-3 md:p-4 rounded-2xl border-2 shadow-[4px_4px_0_0_#000] bg-white z-1 font-bold;
+    }
+    .landing-row-1 p{
+      @apply flex justify-center items-center !text-sm w-75 text-center;
+    }
+
+    .landing-couples-books{
+      @apply hidden md:flex w-2/3 justify-around items-center ;
+    }
+    .landing-couple{
+
+    }
+
+    .landing-books{
+      @apply flex flex-row;
+    }
+    .landing-book{
+      @apply w-75 lg:w-100 object-cover z-1;
+    }
+    .landing-couple{
+      @apply w-40 lg:w-60 object-cover z-1;
+    }
+    
+
+    .steps{
+      @apply flex flex-row justify-center gap-12 items-center;
+    }
+    .steps img{
+      @apply w-45 object-cover;
+    }
+    .steps h2{
+      @apply text-center text-xs w-20 lg:w-auto;
+    }
+
+
 }
