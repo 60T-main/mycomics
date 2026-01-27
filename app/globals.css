@@ -134,7 +134,7 @@ body {
   }
   
   .landing-row-1{
-    @apply row-start-1 row-end-2 col-span-2 md:col-span-3 flex flex-col justify-start gap-4 items-center overflow-hidden bg-[url(/background1.jpeg)] bg-cover bg-no-repeat bg-center pt-65 md:pt-0 md:justify-center;
+    @apply row-start-1 row-end-2 col-span-2 md:col-span-3 flex flex-col justify-start gap-4 items-center overflow-hidden bg-[url(/background.jpg)] bg-cover bg-no-repeat bg-center pt-65 md:pt-0 md:justify-center;
   }
   
   .landing-text{
@@ -172,21 +172,21 @@ body {
     }
     .step-1{
       @apply row-start-2 col-span-1 border-r-4;
-      background-image: url("/upload2.jpeg");
+      background-image: url("/upload.jpg");
       background-position:center;
       background-size: cover;
       background-repeat: no-repeat;
     }
     .step-2{
       @apply row-start-3 md:row-start-2 col-span-1 border-r-4;
-      background-image: url("/draw2.jpeg");
+      background-image: url("/draw.jpg");
       background-position:center;
       background-size: cover;
       background-repeat: no-repeat;
     }
     .step-3{
       @apply row-start-4 md:row-start-2 col-span-1;
-      background-image: url("/finished2.jpeg");
+      background-image: url("/finished.jpg");
       background-position:center;
       background-size: cover;
       background-repeat: no-repeat;
@@ -207,10 +207,13 @@ body {
   }
 
   .landing-couples-books{
-    @apply flex flex-col w-full items-center gap-10 relative row-start-5 md:row-start-3 col-span-1 md:col-span-3;
+    @apply flex flex-col w-full items-center gap-10 relative row-start-5 md:row-start-3 col-span-1 md:col-span-3 bg-[url(/background2.jpeg)];
+    background-repeat: no-repeat;
+    background-size: cover;
     overflow: hidden;
+    background-position: left center;
   }
-  .landing-couples-books::before, .landing-couples-books::after{
+  /* .landing-couples-books::before, .landing-couples-books::after{
     content: "";
     position: absolute;
     top: 0;
@@ -236,15 +239,15 @@ body {
     -moz-transform: scale(-1, -1);
     -o-transform: scale(-1, -1);
     transform: scale(-1, -1);
-  }
+  } */
   
   
   .landing-couples-text{
-    @apply z-1 pt-6 w-70 text-center;
+    @apply z-1 pt-6 w-60 md:w-150 text-center;
   }
   
   .landing-couples-books-inner{
-    @apply flex flex-row justify-around items-center w-full px-12 -mt-10 z-1;
+    @apply flex flex-row justify-around items-center w-full px-12 -mt-10 z-1 relative;
   }
 
     .landing-couple{
@@ -256,10 +259,10 @@ body {
       transform: rotate(8deg);
     }
     .landing-book{
-      @apply w-75 lg:w-100 object-cover z-1;
+      @apply w-40 md:w-85 absolute -left-12 top-1 md:-left-30 md:top-4 lg:w-100 object-cover z-1 !max-w-none;
     }
     .landing-couple{
-      @apply w-45 lg:w-70 object-cover z-1;
+      @apply w-55 md:w-120 -left-15 top-8 md:-left-30 md:top-10 lg:w-140 absolute object-cover z-1;
     }
 
     .arrow-png{

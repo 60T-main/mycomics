@@ -28,22 +28,16 @@ export default function LandingBanner() {
         <article className="landing-couples-books inline-font">
           <div className="landing-couples-text">
             <h2>მიიღე პერსონალური კომიქსის წიგნი</h2>
-            <p>იდეალური საჩუქარი მეგობრებისთვის და ოჯახისთვის</p>
           </div>
 
           <div className="landing-couples-books-inner">
             <div className="landing-couples">
               <img
                 className="landing-couple"
-                src="/couple.png"
+                src="/couple2.png"
                 alt="photo of a couple"
               />
             </div>
-            <img
-              className="arrow-png"
-              src="/arrow.png"
-              alt="photo of a couple"
-            />
             <div className="landing-books">
               <img
                 className="landing-book"
