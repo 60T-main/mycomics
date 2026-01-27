@@ -3,24 +3,47 @@ export default function LandingBanner() {
     <main className="landing-page">
       <section className="landing-banner-section">
         <article className="landing-row-1">
-          <h1 className="inline-font">შექმენი საკუთარი კომიქსი</h1>
-          <p>შენ და შენი საყვარელი ადამიანები მთავარ როლში</p>
+          <div className="landing-text">
+            <h1 className="inline-font">შექმენი საკუთარი კომიქსი</h1>
+            <p className="inline-font">
+              შენ და შენი საყვარელი ადამიანები მთავარ როლში
+            </p>
+            <a className="action-button" href="/">
+              შეუკვეთე შენი კომიქსი
+            </a>
+          </div>
 
-          <div className="landing-couples-books">
+          <img className="superman" src="/superman.png" alt="" />
+          <img className="supergirl" src="/supergirl.png" alt="" />
+        </article>
+        <article className="steps step-1">
+          <h3 className="inline-font font-bold">ატვირთე ფოტოები</h3>
+        </article>
+        <article className="steps step-2 ">
+          <h3 className="inline-font font-bold">აირჩიე სტილი</h3>
+        </article>
+        <article className="steps step-3">
+          <h3 className="inline-font font-bold">მიიღე მზა კომიქსი</h3>
+        </article>
+        <article className="landing-couples-books inline-font">
+          <div className="landing-couples-text">
+            <h2>მიიღე პერსონალური კომიქსის წიგნი</h2>
+            <p>იდეალური საჩუქარი მეგობრებისთვის და ოჯახისთვის</p>
+          </div>
+
+          <div className="landing-couples-books-inner">
             <div className="landing-couples">
               <img
                 className="landing-couple"
-                src="/couple.jpg"
+                src="/couple.png"
                 alt="photo of a couple"
               />
             </div>
-
             <img
-              className="w-20 object-contain"
+              className="arrow-png"
               src="/arrow.png"
               alt="photo of a couple"
             />
-
             <div className="landing-books">
               <img
                 className="landing-book"
@@ -30,28 +53,6 @@ export default function LandingBanner() {
             </div>
           </div>
         </article>
-        <article className="steps row-start-2 col-span-1 border-r-2">
-          <h3 className="inline-font font-bold">ატვირთე ფოტოები</h3>
-          <img
-            src="/upload.jpeg"
-            alt="ai image of uploading image on smartphone"
-          />
-        </article>
-        <article className="steps row-start-2 col-span-1 border-r-2">
-          <h3 className="inline-font font-bold">აირჩიე სტილი</h3>
-          <img
-            src="/draw.jpeg"
-            alt="ai image of drawing superheros on a comic book"
-          />
-        </article>
-        <article className="steps row-start-2 col-span-1">
-          <h3 className="inline-font font-bold">მიიღე მზა კომიქსი</h3>
-          <img
-            src="/finished.jpeg"
-            alt="ai image of a hand holding a comic book"
-          />
-        </article>
-        <article className="row-start-3 row-end-4 col-span-3">Col 4</article>
       </section>
     </main>
   );
