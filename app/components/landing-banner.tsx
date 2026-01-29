@@ -3,6 +3,21 @@ export default function LandingBanner() {
     <main className="landing-page">
       <section className="landing-banner-section">
         <article className="landing-row-1">
+          <img
+            className="cloud cloud1"
+            src="/cloud1.png"
+            alt="image of a cloud"
+          />
+          <img
+            className="cloud cloud2"
+            src="/cloud2.png"
+            alt="image of a cloud"
+          />
+          <img
+            className="cloud cloud3"
+            src="/cloud3.png"
+            alt="image of a cloud"
+          />
           <div className="landing-text">
             <h1 className="inline-font">შექმენი საკუთარი კომიქსი</h1>
             <p className="inline-font">
@@ -12,7 +27,6 @@ export default function LandingBanner() {
               შეუკვეთე შენი კომიქსი
             </a>
           </div>
-
           <img className="superman" src="/superman.png" alt="" />
           <img className="supergirl" src="/supergirl.png" alt="" />
         </article>
@@ -35,9 +49,14 @@ export default function LandingBanner() {
               <img
                 className="landing-couple"
                 src="/couple2.png"
-                alt="photo of a couple"
+                alt="illustration of a hand holding a phone with a photo of a couple"
               />
             </div>
+            <img
+              className="arrow-png"
+              src="/arrow.png"
+              alt="iamge of an arrow icon"
+            />
             <div className="landing-books">
               <img
                 className="landing-book"
