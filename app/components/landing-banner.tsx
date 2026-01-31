@@ -1,3 +1,5 @@
+import PlanCarousel from "./price-plan";
+
 export default function LandingBanner() {
   return (
     <main className="landing-page">
@@ -30,15 +32,6 @@ export default function LandingBanner() {
           <img className="superman" src="/superman.png" alt="" />
           <img className="supergirl" src="/supergirl.png" alt="" />
         </article>
-        <article className="steps step-1">
-          <h3 className="inline-font font-bold">ატვირთე ფოტოები</h3>
-        </article>
-        <article className="steps step-2 ">
-          <h3 className="inline-font font-bold">აირჩიე სტილი</h3>
-        </article>
-        <article className="steps step-3">
-          <h3 className="inline-font font-bold">მიიღე მზა კომიქსი</h3>
-        </article>
         <article className="landing-couples-books inline-font">
           <div className="landing-couples-text">
             <h2>მიიღე პერსონალური კომიქსის წიგნი</h2>
@@ -66,6 +59,17 @@ export default function LandingBanner() {
             </div>
           </div>
         </article>
+
+        <article className="steps step-1">
+          <h3 className="inline-font font-bold">ატვირთე ფოტოები</h3>
+        </article>
+        <article className="steps step-2 ">
+          <h3 className="inline-font font-bold">აირჩიე სტილი</h3>
+        </article>
+        <article className="steps step-3">
+          <h3 className="inline-font font-bold">მიიღე მზა კომიქსი</h3>
+        </article>
+        <PlanCarousel></PlanCarousel>
       </section>
     </main>
   );

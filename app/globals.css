@@ -32,9 +32,13 @@
   font-display: swap;
 }
 
-    .inline-font {
+html{
+  @apply scroll-smooth;
+}
+
+.inline-font {
       font-feature-settings: "case";
-    }
+  }
 
 body {
   @apply bg-[var(--background)];
@@ -127,7 +131,7 @@ body {
   }
   
   .landing-banner-section{
-    @apply grid grid-rows-[100vh_25vh_25vh_25vh_35vh] md:grid-rows-[100vh_30vh_40vh] lg:grid-rows-[100vh_25vh_50vh] xl:grid-rows-[100vh_25vh_90vh] grid-cols-1 md:grid-cols-3;
+    @apply grid grid-rows-[100vh_25vh_25vh_25vh_35vh] md:grid-rows-[100vh_30vh_40vh] lg:grid-rows-[100vh_25vh_50vh] xl:grid-rows-[100vh_35vh_80vh] grid-cols-1 md:grid-cols-3;
   }
   .landing-banner-section article{
     @apply border-b-4 border-black;
@@ -187,14 +191,14 @@ body {
       @apply flex flex-col items-start justify-center pl-2 lg:pl-12 ;
     }
     .step-1{
-      @apply row-start-2 col-span-1 border-r-4;
+      @apply row-start-2 col-span-1 md:border-r-4;
       background-image: url("/upload.jpg");
       background-position:center;
       background-size: cover;
       background-repeat: no-repeat;
     }
     .step-2{
-      @apply row-start-3 md:row-start-2 col-span-1 border-r-4;
+      @apply row-start-3 md:row-start-2 col-span-1 md:border-r-4;
       background-image: url("/draw.jpg");
       background-position:center;
       background-size: cover;
@@ -229,34 +233,7 @@ body {
     overflow: hidden;
     background-position: left center;
   }
-  /* .landing-couples-books::before, .landing-couples-books::after{
-    content: "";
-    position: absolute;
-    top: 0;
-    width: 360px;
-    height: 100%;
-    background-repeat: no-repeat;
-    background-size: contain;
-    pointer-events: none;
-  }
-  
-  .landing-couples-books::before {
-    left: 0;
-    background-image: url(/bg-clouds.png);
-    background-position: left center;
-  }
-  
-  .landing-couples-books::after {
-    @apply origin-[85%] min-[768px]:origin-[75%] lg:origin-[70%];
-    right: 0;
-    background-image: url(/bg-clouds.png);
-    background-position: right center;
-    -webkit-transform: scale(-1, -1);
-    -moz-transform: scale(-1, -1);
-    -o-transform: scale(-1, -1);
-    transform: scale(-1, -1);
-  } */
-  
+
   
   .landing-couples-text{
     @apply z-1 pt-6 w-60 md:w-150 text-center;
@@ -284,3 +261,13 @@ body {
     .arrow-png{
       @apply hidden lg:flex absolute top-15 w-80 xl:top-60 xl:w-100 2xl:w-120 xl:top-50 object-contain;
     }
+
+
+    .prices-article{
+      @apply row-start-6 pl-2 py-4 w-full select-none;
+    }
+
+    .prices-article .flex > div:last-child .price-card{
+      @apply border-r-2;
+    }
+
