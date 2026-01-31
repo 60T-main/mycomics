@@ -3,6 +3,9 @@ export default function Header() {
     <header>
       <img src="logo.png" alt="website logo 'mycomics.ge'" />
       <div className="header-links">
+        <a className="header-prices" href="#prices-article">
+          ფასები
+        </a>
         <a className="header-action" href="/">
           შეკვეთა
         </a>

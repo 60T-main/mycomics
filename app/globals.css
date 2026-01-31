@@ -10,7 +10,8 @@
   --color-primary-font: black;
   --color-secondary-font: #858585;
   --color-primary: #fbc564;
-  --color-secondary: #ab3630;
+  --color-secondary: #F97316;
+  --color-hover: #EA580C;
   --padding-x-medium: 8rem;
   --padding-x-large: 12rem;
 }
@@ -115,12 +116,28 @@ body {
     @apply flex justify-between items-center px-4 lg:px-12 min-h-20 bg-none !fixed z-99999999 w-full;
   }
 
-    .header-action{
-      @apply bg-[var(--color-primary)] border-2 px-6 py-3 rounded-3xl font-bold shadow-[0_3px_0_0_#000] transition-all duration-300 hidden md:flex;
+  .header-action, .header-prices{
+    @apply min-w-25;
+  }
+
+    .header-action,.header-prices{
+      @apply border-2 px-6 py-3 rounded-3xl font-bold shadow-[0_3px_0_0_#000] transition-all duration-200 hidden md:flex;
     }
-    .header-action:hover{
+    .header-action{
+      @apply bg-[var(--color-secondary)] hover:bg-[var(--color-hover)];
+    }
+    
+    .header-prices{
+      @apply bg-white;
+    }
+    
+    .header-action:hover, .header-prices:hover{
       @apply font-bold shadow-none;
     }
+
+  .header-links{
+    @apply flex gap-4;  
+  }
 
   header i{
     @apply text-black text-3xl flex md:hidden;
@@ -168,7 +185,7 @@ body {
   }
 
   .action-button {
-    @apply text-black font-bold !text-base lg:!text-xl border-2 py-3 text-center lg:py-4 min-w-65 md:min-w-100 lg:px-12 rounded-4xl bg-[var(--color-primary)] shadow-[0px_4px_0_0_#000];
+    @apply text-black font-bold !text-base lg:!text-xl border-2 py-3 text-center lg:py-4 min-w-65 md:min-w-100 lg:px-12 rounded-4xl bg-[var(--color-secondary)] hover:bg-[var(--color-hover)] shadow-[0px_4px_0_0_#000] transition-all duration-200;
     animation: pulse-scale 3s ease-in-out infinite;
   }
 
@@ -191,14 +208,14 @@ body {
       @apply flex flex-col items-start justify-center pl-2 lg:pl-12 ;
     }
     .step-1{
-      @apply row-start-2 col-span-1 md:border-r-4;
+      @apply row-start-2 col-span-1 border-r-4;
       background-image: url("/upload.jpg");
       background-position:center;
       background-size: cover;
       background-repeat: no-repeat;
     }
     .step-2{
-      @apply row-start-3 md:row-start-2 col-span-1 md:border-r-4;
+      @apply row-start-3 md:row-start-2 col-span-1 border-r-4;
       background-image: url("/draw.jpg");
       background-position:center;
       background-size: cover;
@@ -259,12 +276,12 @@ body {
     }
 
     .arrow-png{
-      @apply hidden lg:flex absolute top-15 w-80 xl:top-60 xl:w-100 2xl:w-120 xl:top-50 object-contain;
+      @apply hidden xl:flex absolute top-15 w-80 xl:top-60 xl:w-100 2xl:w-120 xl:top-50 object-contain;
     }
 
 
     .prices-article{
-      @apply row-start-6 pl-2 py-4 w-full select-none;
+      @apply row-start-6 px-2 py-4 select-none md:col-span-3 xl:flex xl:flex-col xl:items-center xl:justify-center;
     }
 
     .prices-article .flex > div:last-child .price-card{
