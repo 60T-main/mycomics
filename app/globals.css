@@ -48,7 +48,7 @@ body {
 }
 
 .h1, h1 {
-  @apply text-lg md:text-2xl xl:text-4xl leading-tight md:text-3xl;
+  @apply text-xl md:text-2xl xl:text-4xl leading-tight md:text-3xl;
 }
 
 .h2,h2 {
@@ -213,7 +213,7 @@ body {
     @apply flex flex-col justify-center items-center gap-4 bg-[#fbeccb] border-3 rounded-4xl p-8 shadow-[0_4px_0_0_#000] w-95/100 md:w-2/3 xl:w-1/2 relative z-1;
   }
   .landing-row-1 h1{
-    @apply flex justify-center items-center text-center overflow-hidden z-1 font-bold;
+    @apply flex justify-center items-center text-center overflow-hidden z-1 font-bold text-nowrap;
   }
   .landing-row-1 p{
     @apply flex justify-center items-center text-center;
@@ -242,22 +242,49 @@ body {
     @apply row-start-2 -mt-8;
   }
 
-  
-  .steps h3{
-    @apply text-center w-90 h-45 md:w-45 md:h-25 lg:h-30 lg:w-55 flex items-start mt-2 pt-16 pl-4 justify-center;
+  .steps-text-div{
+    @apply flex flex-col;
+  }
+
+  .steps-text-div h3 {
+  @apply text-center w-55 h-45 md:w-45 md:h-25 lg:h-30 lg:w-55 flex items-start mt-2 pt-16 pl-4 justify-center;
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
   }
+  .steps-text-div p {
+  @apply flex items-center justify-center w-55 h-25 !-mt-4 z-1;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  
+  /* .steps h3{
+    @apply text-center w-90 h-45 md:w-45 md:h-25 lg:h-30 lg:w-55 flex items-start mt-2 pt-16 pl-4 justify-center;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+  } */
   .step-1 h3{
     background-image: url("/text-box.png");
   }
+  .step-1 p{
+    @apply h-35 w-65 !-ml-8 !-mt-10;
+    background-image: url("/text-box-2.png");
+  }
   .step-2 h3{
     background-image: url("/text-box2.png");
-
+  }
+  .step-2 p{
+    background-image: url("/text-box-2.png");
   }
   .step-3 h3{
     background-image: url("/text-box.png");
+
+  }
+  .step-3 p{
+    background-image: url("/text-box-2.png");
 
   }
 
@@ -271,11 +298,11 @@ body {
   }
 
   .steps-content{
-    @apply flex;
+    @apply flex overflow-hidden;
   }
 
   .steps-img{
-    @apply w-34 mt-20;
+    @apply w-35 aspect-auto mt-20;
   }
 
   .steps-img-1{
@@ -346,20 +373,35 @@ body {
     .price-action-button {
       @apply font-bold !text-base lg:!text-xl border-2 py-3 text-center lg:py-4 min-w-65 md:min-w-80 lg:px-12 rounded-4xl bg-[var(--color-secondary)] hover:bg-[var(--color-hover)] shadow-[0px_4px_0_0_#000] transition-all duration-200;
     }
-    
+
+
+
     .design-element{
-      @apply absolute w-22;
+      @apply absolute w-22 z-10;
     }
 
     .e-1{
-      @apply left-5 top-4 -rotate-15;
+      @apply left-5 top-3 -rotate-15 w-30;
     }
     .e-2{
-      @apply right-3 top-40 rotate-15;
+      @apply right-2 top-28 rotate-15;
     }
     .e-3{
-      @apply top-55 -rotate-15 !w-25; 
+      @apply top-65 left-30 -rotate-15 !w-25; 
     }
     .e-4{
       @apply top-65 right-5 -rotate-15;
+    }
+
+    .a-1{
+      @apply right-5 top-4;
+    }
+    .a-2{
+      @apply left-3 top-35 -rotate-75;
+    }
+    .a-3{
+      @apply top-48 -rotate-15 !w-28; 
+    }
+    .a-4{
+      @apply top-70 left-5 w-18;
     }
