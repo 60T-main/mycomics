@@ -71,6 +71,7 @@ body {
   @apply text-xs md:text-base m-0 p-0;
 }
 
+
 @layer utilities {
 
 
@@ -112,12 +113,46 @@ body {
 @layer components {
 
   header{
+    @apply flex flex-col justify-center px-4 lg:px-12 min-h-20 bg-none !fixed z-99999999 w-full relative;
+    box-shadow: 0 6px 6px #00000033, 0 0 20px #0000001a;
+    transition: all 0.4s cubic-bezier (0.175,0.885,0.32,2.2);
+  }
 
-    @apply flex justify-between items-center px-4 lg:px-12 min-h-20 bg-none !fixed z-99999999 w-full;
+
+  .effect{
+    @apply absolute z-0 inset-0;
+    backdrop-filter: blur(12px);
+    filter: url(#glass-distortion);
+    overflow: hidden;
+  }
+
+  .tint{
+    @apply z-1 absolute inset-0 bg-[#ffffff80];
+  }
+
+  .shine{
+    @apply absolute inset-0 z-2;
+    overflow: hidden;
+    box-shadow: 2px 2px 1px 0 #ffffff80, -1px -1px 1px 1px #ffffff80;
+  }
+
+  .header-content{
+    @apply z-3;
+  }
+
+  .dock{
+    @apply flex justify-between items-center;
+  }
+  .dock i{
+    @apply z-3;
+  }
+
+  .header-logo{
+    @apply z-3;
   }
 
   .header-action, .header-prices{
-    @apply min-w-25;
+    @apply min-w-25 z-3;
   }
 
     .header-action,.header-prices{
@@ -148,16 +183,16 @@ body {
   }
   
   .landing-banner-section{
-    @apply grid grid-rows-[100vh_25vh_25vh_25vh_35vh] md:grid-rows-[100vh_30vh_40vh] lg:grid-rows-[100vh_25vh_50vh] xl:grid-rows-[100vh_35vh_80vh] grid-cols-1 md:grid-cols-3;
+    @apply grid grid-rows-[100vh_200vh_35vh] md:grid-rows-[100vh_30vh_40vh] lg:grid-rows-[75rem_25vh_50vh] xl:grid-rows-[120vh_35vh_80vh] grid-cols-1 md:grid-cols-3;
   }
-  .landing-banner-section article{
+  /* .landing-banner-section article{
     @apply border-b-4 border-black;
-  }
+  } */
   
   .landing-row-1{
-    @apply row-start-1 row-end-2 col-span-2 md:col-span-3 flex flex-col justify-start gap-4 items-center overflow-hidden bg-cover bg-no-repeat bg-center pt-65 md:pt-0 md:justify-center;
+    @apply row-start-1 row-end-2 col-span-2 md:col-span-3 flex flex-col justify-start gap-4 items-center overflow-hidden bg-contain bg-no-repeat bg-center pt-65 md:pt-0 md:justify-center;
     background-image: url('/bg.png'), linear-gradient(to bottom, transparent, #FBC564);
-    background-position: 50% 10%, center;
+    background-position: bottom center;
     background-size: cover, cover;
   }
 
@@ -165,13 +200,13 @@ body {
     @apply absolute w-40 md:w-65 lg:w-80 xl:w-110 opacity-80;
   }
   .cloud1{
-    @apply top-20 lg:top-10 left-2 lg:left-10;
+    @apply top-20 lg:top-20 left-2 lg:left-10;
   }
   .cloud2{
-    @apply top-20 lg:top-10 right-2 lg:right-10;
+    @apply top-20 lg:top-20 right-2 lg:right-10;
   }
   .cloud3{
-    @apply top-45 lg:top-30;
+    @apply top-45 lg:top-50;
   }
   
   .landing-text{
@@ -188,11 +223,11 @@ body {
     @apply text-black font-bold !text-base lg:!text-xl border-2 py-3 text-center lg:py-4 min-w-65 md:min-w-100 lg:px-12 rounded-4xl bg-[var(--color-secondary)] hover:bg-[var(--color-hover)] shadow-[0px_4px_0_0_#000] transition-all duration-200;
     animation: pulse-scale 3s ease-in-out infinite;
   }
-
+  
   .superman, .supergirl{
     @apply absolute w-45
-     md:w-70 lg:w-100 xl:w-110 top-20 md:top-20 z-10;
-    }
+    md:w-70 lg:w-100 xl:w-110 top-20 md:top-20 z-10;
+  }
 
   .superman{
     @apply left-1 md:left-25;
@@ -203,69 +238,81 @@ body {
     animation: hover 2.5s ease-in-out infinite;
   }
   
-  
   .steps{
-      @apply flex flex-col items-start justify-center pl-2 lg:pl-12 ;
-    }
-    .step-1{
-      @apply row-start-2 col-span-1 border-r-4;
-      background-image: url("/upload.jpg");
-      background-position:center;
-      background-size: cover;
-      background-repeat: no-repeat;
-    }
-    .step-2{
-      @apply row-start-3 md:row-start-2 col-span-1 border-r-4;
-      background-image: url("/draw.jpg");
-      background-position:center;
-      background-size: cover;
-      background-repeat: no-repeat;
-    }
-    .step-3{
-      @apply row-start-4 md:row-start-2 col-span-1;
-      background-image: url("/finished.jpg");
-      background-position:center;
-      background-size: cover;
-      background-repeat: no-repeat;
-    }
-    
-    .steps h3{
-      @apply text-center w-55 h-30 md:w-45 md:h-25 lg:h-30 lg:w-55 flex items-center justify-center p-12 md:p-10;
-      background-image: url("/text-box.png");
-      background-position: center;
-      background-size: cover;
-      background-repeat: no-repeat;
-    }
-    
-    .landing-buttons{
-      @apply flex justify-center items-center
-    }
-    
+    @apply row-start-2 -mt-8;
   }
 
-  .landing-couples-books{
-    @apply flex flex-col w-full items-center gap-10 relative row-start-5 md:row-start-3 col-span-1 md:col-span-3 bg-[url(/background2.jpeg)];
+  
+  .steps h3{
+    @apply text-center w-90 h-45 md:w-45 md:h-25 lg:h-30 lg:w-55 flex items-start mt-2 pt-16 pl-4 justify-center;
+    background-position: center;
+    background-size: contain;
     background-repeat: no-repeat;
-    background-size: cover;
-    overflow: hidden;
-    background-position: left center;
+  }
+  .step-1 h3{
+    background-image: url("/text-box.png");
+  }
+  .step-2 h3{
+    background-image: url("/text-box2.png");
+
+  }
+  .step-3 h3{
+    background-image: url("/text-box.png");
+
   }
 
+
+  .step-2 .steps-content h3{
+    @apply !pl-0 ;
+  }
+
+  .step{
+    @apply flex flex-col items-center justify-start ;
+  }
+
+  .steps-content{
+    @apply flex;
+  }
+
+  .steps-img{
+    @apply w-34 mt-20;
+  }
+
+  .steps-img-1{
+    animation: hover 4.5s ease-in-out infinite;
+  }
+  .steps-img-2{
+    animation: hover 5.5s ease-in-out infinite;
+  }
+  .steps-img-3{
+    animation: hover 6s ease-in-out infinite;
+  }
   
-  .landing-couples-text{
-    @apply z-1 pt-6 w-60 md:w-150 text-center;
+  .landing-buttons{
+    @apply flex justify-center items-center
   }
   
-  .landing-couples-books-inner{
-    @apply flex flex-row justify-around items-center w-full px-12 -mt-10 z-1 relative;
+}
+
+.landing-couples-books{
+  @apply flex flex-col w-full items-center gap-10 relative row-start-3 md:row-start-3 col-span-1 md:col-span-3;
+}
+
+
+.landing-couples-text{
+  @apply z-1 pt-6 w-60 md:w-150 text-center;
+}
+  
+.landing-couples-books-inner{
+  @apply flex flex-row justify-around items-center w-full px-12 -mt-10 z-1 relative;
   }
-
-    .landing-couple{
-      transform: rotate(-8deg)
-    }
-
-    .landing-books{
-      @apply flex flex-row;
+  
+  .landing-couple{
+    transform: rotate(-8deg)
+  }
+  
+  .landing-books{
+    @apply flex flex-row;
       transform: rotate(8deg);
     }
     .landing-book{
@@ -274,17 +321,45 @@ body {
     .landing-couple{
       @apply w-55 md:w-120 -left-15 top-8 md:-left-30 md:top-10 lg:top-15 xl:w-140 xl:top-65 2xl:w-180 absolute object-cover z-1;
     }
-
+    
     .arrow-png{
       @apply hidden xl:flex absolute top-15 w-80 xl:top-60 xl:w-100 2xl:w-120 xl:top-50 object-contain;
     }
-
-
+    
+    
     .prices-article{
-      @apply row-start-6 px-2 py-4 select-none md:col-span-3 xl:flex xl:flex-col xl:items-center xl:justify-center;
+      @apply row-start-4 px-2 py-4 select-none md:col-span-3 xl:flex xl:flex-col xl:items-center xl:justify-center bg-[url(/prices-bg.jpeg)] bg-cover bg-no-repeat bg-center;
     }
 
+    .price-card{
+      @apply relative overflow-hidden bg-transparent border-2 border-r-0 p-6 shadow-sm z-5;
+    }
+    
     .prices-article .flex > div:last-child .price-card{
       @apply border-r-2;
     }
+    
+    .price-action-div {
+      @apply flex items-center justify-center;
+    }
+    
+    .price-action-button {
+      @apply font-bold !text-base lg:!text-xl border-2 py-3 text-center lg:py-4 min-w-65 md:min-w-80 lg:px-12 rounded-4xl bg-[var(--color-secondary)] hover:bg-[var(--color-hover)] shadow-[0px_4px_0_0_#000] transition-all duration-200;
+    }
+    
+    .design-element{
+      @apply absolute w-22;
+    }
 
+    .e-1{
+      @apply left-5 top-4 -rotate-15;
+    }
+    .e-2{
+      @apply right-3 top-40 rotate-15;
+    }
+    .e-3{
+      @apply top-55 -rotate-15 !w-25; 
+    }
+    .e-4{
+      @apply top-65 right-5 -rotate-15;
+    }

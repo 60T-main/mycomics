@@ -214,16 +214,21 @@ export default function PlanCarousel() {
       <div className="overflow-hidden xl:hidden" ref={emblaRef}>
         <div className="flex">
           {plans.map((plan) => (
-            <div key={plan.name} className="flex-[0_0_85%] sm:flex-[0_0_420px]">
-              <div className="price-card border-2 border-r-0 bg-white p-6 shadow-sm">
-                <div className="flex flex-col gap-2">
+            <div
+              key={plan.name}
+              className="flex-[0_0_85%] sm:flex-[0_0_420px] z-5"
+            >
+              <div className="price-card">
+                <div className="effect"></div>
+                <div className="tint"></div>
+                <div className="shine"></div>
+                <div className="relative z-3 flex flex-col gap-2">
                   <h4 className="text-[var(--color-secondary-font)]">
                     {plan.name}
                   </h4>
                   <div className="text-3xl font-semibold">{plan.price}</div>
                 </div>
-
-                <div className="mt-6 space-y-3">
+                <div className="relative z-3 mt-6 space-y-3">
                   {plan.features.map((f, i) => (
                     <div
                       key={`${plan.name}-${i}`}
@@ -249,13 +254,13 @@ export default function PlanCarousel() {
       </div>
 
       {/* Dots */}
-      <div className="mt-4 flex justify-center gap-2 xl:hidden">
+      <div className="mt-4 flex justify-center gap-2 xl:hidden bg-white  rounded-full mx-auto h-5 w-15 flex items-center">
         {plans.map((_, i) => (
           <button
             key={i}
             onClick={() => emblaApi?.scrollTo(i)}
             className={`h-2 w-2 rounded-full transition ${
-              i === selectedIndex ? "bg-neutral-900" : "bg-neutral-300"
+              i === selectedIndex ? "bg-neutral-900" : "bg-neutral-400"
             }`}
             aria-label={`Go to plan ${i + 1}`}
           />
@@ -266,15 +271,17 @@ export default function PlanCarousel() {
         <div className="flex">
           {plans.map((plan) => (
             <div key={plan.name} className="flex-[0_0_85%] sm:flex-[0_0_420px]">
-              <div className="price-card border-2 border-r-0 bg-white p-6 shadow-sm">
-                <div className="flex flex-col gap-2">
+              <div className="price-card">
+                <div className="effect"></div>
+                <div className="tint"></div>
+                <div className="shine"></div>
+                <div className="relative z-3 flex flex-col gap-2">
                   <h4 className="text-[var(--color-secondary-font)]">
                     {plan.name}
                   </h4>
                   <div className="text-3xl font-semibold">{plan.price}</div>
                 </div>
-
-                <div className="mt-6 space-y-3">
+                <div className="relative z-3 mt-6 space-y-3">
                   {plan.features.map((f, i) => (
                     <div
                       key={`${plan.name}-${i}`}
@@ -293,16 +300,15 @@ export default function PlanCarousel() {
                     </div>
                   ))}
                 </div>
+                <div className="price-action-div relative z-3">
+                  <a className="price-action-button my-6 md:mt-12" href="/">
+                    შეუკვეთე
+                  </a>
+                </div>
               </div>
             </div>
           ))}
         </div>
-      </div>
-      <div className="w-full flex justify-center items-center">
-        {" "}
-        <a className="action-button my-6 md:my-12" href="/">
-          შეუკვეთე შენი კომიქსი
-        </a>
       </div>
     </article>
   );

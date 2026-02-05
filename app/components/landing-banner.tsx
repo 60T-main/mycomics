@@ -25,7 +25,7 @@ export default function LandingBanner() {
             <p className="inline-font">
               შენ და შენი საყვარელი ადამიანები მთავარ როლში
             </p>
-            <a className="action-button" href="/">
+            <a className="action-button z-5" href="/">
               შეუკვეთე შენი კომიქსი
             </a>
           </div>
@@ -59,16 +59,73 @@ export default function LandingBanner() {
             </div>
           </div>
         </article>
+        <article className="steps">
+          <img
+            className="transform -scale-x-100"
+            src="border.png"
+            alt="image of a lightning shaped border"
+          />
+          <div className="step step-1 relative">
+            <img className="design-element e-1" src="text-photo.png" alt="" />
+            <img className="design-element e-2" src="photo.png" alt="" />
+            <img className="design-element e-3" src="smartphone.png" alt="" />
+            <img className="design-element e-4" src="shutter.png" alt="" />
+            <h2 className="!text-2xl">ნაბიჯი 1</h2>
+            <div className="steps-content">
+              <img
+                className="steps-img steps-img-1"
+                src="superman-phone.png"
+                alt="superhero man hovering while holding a smartphone"
+              />
+              <h3 className="inline-font font-bold">ატვირთე ფოტოები</h3>
+            </div>
 
-        <article className="steps step-1">
-          <h3 className="inline-font font-bold">ატვირთე ფოტოები</h3>
+            <img src="border.png" alt="image of a lightning shaped border" />
+          </div>
+          <div className="step step-2">
+            <h2 className="!text-2xl">ნაბიჯი 2</h2>
+            <div className="steps-content">
+              <h3 className="inline-font font-bold">შეარჩიე სტილი</h3>
+              <img
+                className="steps-img steps-img-2"
+                src="supergirl-drawing.png"
+                alt="superhero woman hovering while holding a comic book and scribbling inside it"
+              />
+            </div>
+
+            <img
+              className="transform -scale-x-100"
+              src="border.png"
+              alt="image of a lightning shaped border"
+            />
+          </div>
+          <div className="step step-3">
+            <h2 className="!text-2xl">ნაბიჯი 3</h2>
+            <div className="steps-content">
+              <img
+                className="steps-img steps-img-3"
+                src="couple-reading.png"
+                alt="superhero woman hovering while holding a comic book and scribbling inside it"
+              />
+              <h3 className="inline-font font-bold">მიიღე მზა კომიქსი</h3>
+            </div>
+          </div>
         </article>
-        <article className="steps step-2 ">
+        {/* <article className="steps step-1 relative">
+          <h3 className="inline-font font-bold">ატვირთე ფოტოები</h3>
+
+        </article>
+        <article className="steps step-2 relative">
           <h3 className="inline-font font-bold">აირჩიე სტილი</h3>
+          <img
+            className="absolute bottom-2"
+            src="border.png"
+            alt="image of a lightning shaped border"
+          />
         </article>
         <article className="steps step-3">
           <h3 className="inline-font font-bold">მიიღე მზა კომიქსი</h3>
-        </article>
+        </article> */}
         <PlanCarousel></PlanCarousel>
       </section>
     </main>
