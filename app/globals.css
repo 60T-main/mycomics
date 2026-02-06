@@ -101,7 +101,7 @@ body {
 
 
   50% {
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
 
   100% {
@@ -231,32 +231,46 @@ body {
 
   .superman{
     @apply left-1 md:left-25;
-    animation: hover 3.5s ease-in-out infinite;
+    animation: hover 5.5s ease-in-out infinite;
   }
   .supergirl{
     @apply right-1 md:right-25;
-    animation: hover 2.5s ease-in-out infinite;
+    animation: hover 6.5s ease-in-out infinite;
   }
   
   .steps{
-    @apply row-start-2 -mt-8;
+    @apply flex flex-col row-start-2 -mt-8;
+  }
+
+  .step{
+    @apply border-b-2 border-neutral-300 py-8 
+    flex flex-col items-center justify-start;
+     
+  }
+  .step-1{
+    @apply border-t-2;
   }
 
   .steps-text-div{
-    @apply flex flex-col;
+    @apply flex flex-col z-1;
   }
 
   .steps-text-div h3 {
-  @apply text-center w-55 h-45 md:w-45 md:h-25 lg:h-30 lg:w-55 flex items-start mt-2 pt-16 pl-4 justify-center;
+  @apply text-center w-55 h-35 mt-8 aspect-video md:w-45 md:h-25 lg:h-30 lg:w-55 flex items-start mt-2 pt-13 pl-1 !ml-1 justify-center !text-xl;
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
   }
   .steps-text-div p {
-  @apply flex items-center justify-center w-55 h-25 !-mt-4 z-1;
+  @apply flex items-center justify-center aspect-video z-1 !text-xs text-nowrap;
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
+  }
+
+  .step-number{
+    @apply flex items-start justify-center w-55 h-15 pt-3 aspect-video bg-contain bg-no-repeat -mb-8;
+    background-image: url("/step.png");
   }
 
   
@@ -270,11 +284,11 @@ body {
     background-image: url("/text-box.png");
   }
   .step-1 p{
-    @apply h-35 w-65 !-ml-8 !-mt-10;
+    @apply w-55 h-15;
     background-image: url("/text-box-2.png");
   }
   .step-2 h3{
-    background-image: url("/text-box2.png");
+    background-image: url("/text-box.png");
   }
   .step-2 p{
     background-image: url("/text-box-2.png");
@@ -293,20 +307,18 @@ body {
     @apply !pl-0 ;
   }
 
-  .step{
-    @apply flex flex-col items-center justify-start ;
-  }
+
 
   .steps-content{
     @apply flex overflow-hidden;
   }
 
   .steps-img{
-    @apply w-35 aspect-auto mt-20;
+    @apply w-30 aspect-[9/12] mt-15;
   }
 
   .steps-img-1{
-    animation: hover 4.5s ease-in-out infinite;
+    animation: hover 5s ease-in-out infinite;
   }
   .steps-img-2{
     animation: hover 5.5s ease-in-out infinite;
@@ -377,17 +389,17 @@ body {
 
 
     .design-element{
-      @apply absolute w-22 z-10;
+      @apply absolute w-16 z-1 opacity-70;
     }
 
     .e-1{
-      @apply left-5 top-3 -rotate-15 w-30;
+      @apply right-0 top-14 -scale-x-100 !w-17;
     }
     .e-2{
-      @apply right-2 top-28 rotate-15;
+      @apply right-0 top-18 rotate-10;
     }
     .e-3{
-      @apply top-65 left-30 -rotate-15 !w-25; 
+      @apply top-65 left-30 -rotate-15 !w-20; 
     }
     .e-4{
       @apply top-65 right-5 -rotate-15;
@@ -400,7 +412,7 @@ body {
       @apply left-3 top-35 -rotate-75;
     }
     .a-3{
-      @apply top-48 -rotate-15 !w-28; 
+      @apply top-48 -rotate-15 !w-20; 
     }
     .a-4{
       @apply top-70 left-5 w-18;

@@ -60,17 +60,17 @@ export default function LandingBanner() {
           </div>
         </article>
         <article className="steps">
-          <img
+          {/* <img
             className="transform -scale-x-100"
             src="border.png"
             alt="image of a lightning shaped border"
-          />
+          /> */}
           <div className="step step-1 relative">
             <img className="design-element e-1" src="text-photo.png" alt="" />
-            <img className="design-element e-2" src="photo.png" alt="" />
-            <img className="design-element e-3" src="smartphone.png" alt="" />
-            <img className="design-element e-4" src="shutter.png" alt="" />
-            <h2 className="!text-xl">ნაბიჯი 1</h2>
+            {/* <img className="design-element e-2" src="photo.png" alt="" /> */}
+            {/* <img className="design-element e-3" src="smartphone.png" alt="" />
+            <img className="design-element e-4" src="shutter.png" alt="" /> */}
+            <h2 className="step-number">ნაბიჯი 1 / 3</h2>
             <div className="steps-content">
               <img
                 className="steps-img steps-img-1"
@@ -78,21 +78,21 @@ export default function LandingBanner() {
                 alt="superhero man hovering while holding a smartphone"
               />
               <div className="steps-text-div">
-                <h3 className="inline-font font-bold">ატვირთე ფოტოები</h3>
+                <h3 className="inline-font font-bold">ატვირთე ფოტო</h3>
                 <p className="inline-font font-bold">
-                  გადააქციე თავი კომიქსის გმირად
+                  გადაიქეცი კომიქსის გმირად
                 </p>
               </div>
             </div>
 
-            <img src="border.png" alt="image of a lightning shaped border" />
+            {/* <img src="border.png" alt="image of a lightning shaped border" /> */}
           </div>
           <div className="step step-2 relative">
             <img className="design-element a-1" src="pencil.png" alt="" />
             <img className="design-element a-2" src="brush.png" alt="" />
             <img className="design-element a-3" src="ruler.png" alt="" />
             <img className="design-element a-4" src="pen.png" alt="" />
-            <h2 className="!text-xl">ნაბიჯი 2</h2>
+            <h2 className="step-number">ნაბიჯი 2 / 3</h2>
             <div className="steps-content">
               <div className="steps-text-div">
                 <h3 className="inline-font font-bold">შეარჩიე სტილი</h3>
@@ -108,14 +108,14 @@ export default function LandingBanner() {
               />
             </div>
 
-            <img
+            {/* <img
               className="transform -scale-x-100"
               src="border.png"
               alt="image of a lightning shaped border"
-            />
+            /> */}
           </div>
           <div className="step step-3">
-            <h2 className="!text-xl">ნაბიჯი 3</h2>
+            <h2 className="step-number">ნაბიჯი 3 / 3</h2>
             <div className="steps-content">
               <img
                 className="steps-img steps-img-3"
