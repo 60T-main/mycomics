@@ -80,7 +80,7 @@ export default function LandingBanner() {
               <div className="steps-text-div">
                 <h3 className="inline-font font-bold">ატვირთე ფოტო</h3>
                 <p className="inline-font font-bold">
-                  გადაიქეცი კომიქსის გმირად
+                  სასურველია სახეები ჩანდეს
                 </p>
               </div>
             </div>
@@ -88,10 +88,7 @@ export default function LandingBanner() {
             {/* <img src="border.png" alt="image of a lightning shaped border" /> */}
           </div>
           <div className="step step-2 relative">
-            <img className="design-element a-1" src="pencil.png" alt="" />
-            <img className="design-element a-2" src="brush.png" alt="" />
-            <img className="design-element a-3" src="ruler.png" alt="" />
-            <img className="design-element a-4" src="pen.png" alt="" />
+            <img className="design-element a-1" src="pen.png" alt="" />
             <h2 className="step-number">ნაბიჯი 2 / 3</h2>
             <div className="steps-content">
               <div className="steps-text-div">
@@ -104,7 +101,7 @@ export default function LandingBanner() {
               <img
                 className="steps-img steps-img-2"
                 src="supergirl-drawing.png"
-                alt="superhero woman hovering while holding a comic book and scribbling inside it"
+                alt="superhero woman hovering while holding a paint brush"
               />
             </div>
 
@@ -114,17 +111,20 @@ export default function LandingBanner() {
               alt="image of a lightning shaped border"
             /> */}
           </div>
-          <div className="step step-3">
+          <div className="step step-3 relative">
+            <img className="design-element b-1" src="book.png" alt="" />
             <h2 className="step-number">ნაბიჯი 3 / 3</h2>
             <div className="steps-content">
               <img
                 className="steps-img steps-img-3"
                 src="couple-reading.png"
-                alt="superhero woman hovering while holding a comic book and scribbling inside it"
+                alt="superhero couple hovering while holding a comic book together"
               />
               <div className="steps-text-div">
                 <h3 className="inline-font font-bold">მიიღე მზა წიგნი</h3>
-                <p className="inline-font font-bold">დაბეჭდილი წიგნი ან PDF</p>
+                <p className="inline-font font-bold">
+                  ხარისხიანი დაბეჭდილი წიგნი
+                </p>
               </div>
             </div>
           </div>

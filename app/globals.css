@@ -183,7 +183,7 @@ body {
   }
   
   .landing-banner-section{
-    @apply grid grid-rows-[100vh_200vh_35vh] md:grid-rows-[100vh_30vh_40vh] lg:grid-rows-[75rem_25vh_50vh] xl:grid-rows-[120vh_35vh_80vh] grid-cols-1 md:grid-cols-3;
+    @apply grid grid-rows-[100vh_150vh_35vh] md:grid-rows-[100vh_30vh_40vh] lg:grid-rows-[75rem_25vh_50vh] xl:grid-rows-[120vh_35vh_80vh] grid-cols-1 md:grid-cols-3;
   }
   /* .landing-banner-section article{
     @apply border-b-4 border-black;
@@ -239,16 +239,13 @@ body {
   }
   
   .steps{
-    @apply flex flex-col row-start-2 -mt-8;
+    @apply flex flex-col row-start-2 -mt-20;
   }
 
   .step{
     @apply border-b-2 border-neutral-300 py-8 
-    flex flex-col items-center justify-start;
+    flex flex-col items-center justify-start h-85;
      
-  }
-  .step-1{
-    @apply border-t-2;
   }
 
   .steps-text-div{
@@ -262,7 +259,7 @@ body {
     background-repeat: no-repeat;
   }
   .steps-text-div p {
-  @apply flex items-center justify-center aspect-video z-1 !text-xs text-nowrap;
+  @apply flex items-center justify-center aspect-video z-1 !text-xs text-nowrap w-55 h-15 !pt-2;
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
@@ -284,10 +281,10 @@ body {
     background-image: url("/text-box.png");
   }
   .step-1 p{
-    @apply w-55 h-15;
     background-image: url("/text-box-2.png");
   }
   .step-2 h3{
+    @apply !pt-13;
     background-image: url("/text-box.png");
   }
   .step-2 p{
@@ -310,11 +307,11 @@ body {
 
 
   .steps-content{
-    @apply flex overflow-hidden;
+    @apply flex overflow-hidden h-full;
   }
 
   .steps-img{
-    @apply w-30 aspect-[9/12] mt-15;
+    @apply w-30 h-full object-contain mt-8;
   }
 
   .steps-img-1{
@@ -395,25 +392,11 @@ body {
     .e-1{
       @apply right-0 top-14 -scale-x-100 !w-17;
     }
-    .e-2{
-      @apply right-0 top-18 rotate-10;
-    }
-    .e-3{
-      @apply top-65 left-30 -rotate-15 !w-20; 
-    }
-    .e-4{
-      @apply top-65 right-5 -rotate-15;
-    }
 
     .a-1{
-      @apply right-5 top-4;
+      @apply left-0 top-15 -scale-y-100;
     }
-    .a-2{
-      @apply left-3 top-35 -rotate-75;
+    .b-1{
+      @apply right-0 top-16 -scale-x-100;
     }
-    .a-3{
-      @apply top-48 -rotate-15 !w-20; 
-    }
-    .a-4{
-      @apply top-70 left-5 w-18;
-    }
+
