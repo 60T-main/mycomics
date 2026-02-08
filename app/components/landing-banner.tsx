@@ -32,45 +32,13 @@ export default function LandingBanner() {
           <img className="superman" src="/superman.png" alt="" />
           <img className="supergirl" src="/supergirl.png" alt="" />
         </article>
-        <article className="landing-couples-books inline-font">
-          <div className="landing-couples-text">
-            <h2>მიიღე პერსონალური კომიქსის წიგნი</h2>
-          </div>
+        <article className="steps" id="steps-article">
+          <div className="step step-1">
+            <div className="relative">
+              <h2 className="step-number ">ნაბიჯი 1 / 3</h2>
+              <img className="design-element e-1" src="text-photo.png" alt="" />
+            </div>
 
-          <div className="landing-couples-books-inner">
-            <div className="landing-couples">
-              <img
-                className="landing-couple"
-                src="/couple2.png"
-                alt="illustration of a hand holding a phone with a photo of a couple"
-              />
-            </div>
-            <img
-              className="arrow-png"
-              src="/arrow.png"
-              alt="iamge of an arrow icon"
-            />
-            <div className="landing-books">
-              <img
-                className="landing-book"
-                src="/comic-books.png"
-                alt="ai image of couple in manga setting"
-              />
-            </div>
-          </div>
-        </article>
-        <article className="steps">
-          {/* <img
-            className="transform -scale-x-100"
-            src="border.png"
-            alt="image of a lightning shaped border"
-          /> */}
-          <div className="step step-1 relative">
-            <img className="design-element e-1" src="text-photo.png" alt="" />
-            {/* <img className="design-element e-2" src="photo.png" alt="" /> */}
-            {/* <img className="design-element e-3" src="smartphone.png" alt="" />
-            <img className="design-element e-4" src="shutter.png" alt="" /> */}
-            <h2 className="step-number">ნაბიჯი 1 / 3</h2>
             <div className="steps-content">
               <img
                 className="steps-img steps-img-1"
@@ -78,20 +46,22 @@ export default function LandingBanner() {
                 alt="superhero man hovering while holding a smartphone"
               />
               <div className="steps-text-div">
+                <h2 className="step-number-2">ნაბიჯი 1 / 3</h2>
                 <h3 className="inline-font font-bold">ატვირთე ფოტო</h3>
                 <p className="inline-font font-bold">
                   სასურველია სახეები ჩანდეს
                 </p>
               </div>
             </div>
-
-            {/* <img src="border.png" alt="image of a lightning shaped border" /> */}
           </div>
-          <div className="step step-2 relative">
-            <img className="design-element a-1" src="pen.png" alt="" />
-            <h2 className="step-number">ნაბიჯი 2 / 3</h2>
+          <div className="step step-2">
+            <div className="relative">
+              <h2 className="step-number">ნაბიჯი 2 / 3</h2>
+              <img className="design-element a-1" src="pen.png" alt="" />
+            </div>
             <div className="steps-content">
               <div className="steps-text-div">
+                <h2 className="step-number-2">ნაბიჯი 2 / 3</h2>
                 <h3 className="inline-font font-bold">შეარჩიე სტილი</h3>
                 <p className="inline-font font-bold">
                   კომიქსი, მანგა, ფენტეზი...
@@ -104,16 +74,13 @@ export default function LandingBanner() {
                 alt="superhero woman hovering while holding a paint brush"
               />
             </div>
-
-            {/* <img
-              className="transform -scale-x-100"
-              src="border.png"
-              alt="image of a lightning shaped border"
-            /> */}
           </div>
           <div className="step step-3 relative">
-            <img className="design-element b-1" src="book.png" alt="" />
-            <h2 className="step-number">ნაბიჯი 3 / 3</h2>
+            <div className="relative">
+              <img className="design-element b-1" src="book.png" alt="" />
+              <h2 className="step-number">ნაბიჯი 3 / 3</h2>
+            </div>
+
             <div className="steps-content">
               <img
                 className="steps-img steps-img-3"
@@ -121,6 +88,7 @@ export default function LandingBanner() {
                 alt="superhero couple hovering while holding a comic book together"
               />
               <div className="steps-text-div">
+                <h2 className="step-number-2">ნაბიჯი 3 / 3</h2>
                 <h3 className="inline-font font-bold">მიიღე მზა წიგნი</h3>
                 <p className="inline-font font-bold">
                   ხარისხიანი დაბეჭდილი წიგნი
@@ -129,21 +97,6 @@ export default function LandingBanner() {
             </div>
           </div>
         </article>
-        {/* <article className="steps step-1 relative">
-          <h3 className="inline-font font-bold">ატვირთე ფოტოები</h3>
-
-        </article>
-        <article className="steps step-2 relative">
-          <h3 className="inline-font font-bold">აირჩიე სტილი</h3>
-          <img
-            className="absolute bottom-2"
-            src="border.png"
-            alt="image of a lightning shaped border"
-          />
-        </article>
-        <article className="steps step-3">
-          <h3 className="inline-font font-bold">მიიღე მზა კომიქსი</h3>
-        </article> */}
         <PlanCarousel></PlanCarousel>
       </section>
     </main>
