@@ -206,9 +206,7 @@ export default function PlanCarousel() {
 
   return (
     <article id="prices-article" className="prices-article">
-      <h2 className="font-semibold mb-4 inline-font flex w-full items-center justify-center py-4 md:py-12">
-        ფასები
-      </h2>
+      <h2 className="inline-font">ფასები</h2>
 
       {/* Embla viewport */}
       <div className="overflow-hidden xl:hidden" ref={emblaRef}>

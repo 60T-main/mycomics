@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FAFAF9;
+  --background: white;
   --foreground: #000000;
 }
 
@@ -14,6 +14,7 @@
   --color-hover: #EA580C;
   --padding-x-medium: 8rem;
   --padding-x-large: 12rem;
+  --shadow: 4px 4px 0 0 #000;
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -117,10 +118,31 @@ li, .li{
 @layer components {
 
   header{
-    @apply flex flex-col justify-center px-4 lg:px-12 min-h-20 bg-none !fixed z-99999999 w-full relative;
-    box-shadow: 0 6px 6px #00000033, 0 0 20px #0000001a;
+    @apply flex flex-col justify-center px-4 lg:px-12 min-h-20 bg-none !fixed z-99999999 w-full relative border-b-1 border-neutral-500;
     transition: all 0.4s cubic-bezier (0.175,0.885,0.32,2.2);
   }
+
+  .footer{
+    @apply !fixed relative z-99999999 w-full bottom-0 h-16 bg-none flex items-center justify-center border-t-1 border-neutral-500;
+    
+  }
+
+  .footer-content {
+    @apply relative bg-none w-full;
+  }
+  .footer-content nav{
+    @apply flex items-center justify-around mb-4;
+  }
+  .footer-content nav button{
+    @apply flex flex-col text-sm min-w-30;
+  }
+  .footer-content nav button i{
+    @apply text-lg;
+  }
+
+        .footer-content nav button.active {
+          @apply text-[var(--color-primary)];
+        }
 
 
   .effect{
@@ -140,7 +162,7 @@ li, .li{
     box-shadow: 2px 2px 1px 0 #ffffff80, -1px -1px 1px 1px #ffffff80;
   }
 
-  .header-content{
+  .header-content, .footer-content{
     @apply z-3;
   }
 
@@ -169,7 +191,7 @@ li, .li{
     }
 
     .header-action, .header-prices, .header-action-menu{
-      @apply border-2 px-6 py-3 rounded-3xl font-bold shadow-[0_3px_0_0_#000] transition-all duration-200;
+      @apply border-2 px-6 py-3 rounded-3xl font-bold shadow-[var(--shadow)] transition-all duration-200;
     }
     .header-action,.header-action-menu{
       @apply bg-[var(--color-secondary)] hover:bg-[var(--color-hover)];
@@ -206,7 +228,7 @@ li, .li{
 
   
   .landing-banner-section{
-    @apply grid grid-rows-[100vh_135vh] md:grid-rows-[100vh_150vh] lg:grid-rows-[75rem_180vh] xl:grid-rows-[120vh_230vh] grid-cols-1 md:grid-cols-3;
+    @apply grid grid-rows-[100vh] md:grid-rows-[100vh_150vh] lg:grid-rows-[75rem_180vh] xl:grid-rows-[120vh_230vh] grid-cols-1 md:grid-cols-3;
   }
   /* .landing-banner-section article{
     @apply border-b-4 border-black;
@@ -233,7 +255,7 @@ li, .li{
   }
   
   .landing-text{
-    @apply flex flex-col justify-center items-center gap-4 bg-[#fbeccb] border-3 rounded-4xl p-8 shadow-[0_4px_0_0_#000] w-95/100 md:w-2/3 xl:w-1/2 relative z-1;
+    @apply flex flex-col justify-center items-center gap-4 bg-[var(--color-primary)] border-3 rounded-4xl p-8 shadow-[var(--shadow)] w-95/100 md:w-2/3 xl:w-1/2 relative z-1;
   }
   .landing-row-1 h1{
     @apply flex justify-center items-center text-center overflow-hidden z-1 font-bold text-nowrap;
@@ -243,7 +265,7 @@ li, .li{
   }
 
   .action-button {
-    @apply text-black font-bold !text-base lg:!text-xl border-2 py-3 text-center lg:py-4 min-w-65 md:min-w-100 lg:px-12 rounded-4xl bg-[var(--color-secondary)] hover:bg-[var(--color-hover)] shadow-[0px_4px_0_0_#000] transition-all duration-200;
+    @apply text-black font-bold !text-base lg:!text-xl border-2 py-3 text-center lg:py-4 min-w-65 md:min-w-100 lg:px-12 rounded-4xl bg-[var(--color-secondary)] hover:bg-[var(--color-hover)] shadow-[var(--shadow)] transition-all duration-200;
     animation: pulse-scale 3s ease-in-out infinite;
   }
   
@@ -389,7 +411,11 @@ li, .li{
     
     
     .prices-article{
-      @apply row-start-4  py-4 select-none md:col-span-3 xl:flex xl:flex-col xl:items-center xl:justify-center bg-[url(/prices-bg.png)] bg-cover bg-no-repeat bg-center;
+      @apply row-start-4 py-4 select-none md:col-span-3 xl:flex xl:flex-col xl:items-center xl:justify-center bg-[url(/prices-bg.png)] bg-cover bg-no-repeat bg-center pt-30;
+    }
+
+    .prices-article h2 {
+      @apply flex flex-col justify-center items-center bg-[var(--color-primary)] rounded-3xl px-8 shadow-[var(--shadow)] w-55 h-18 lg:w-100 mx-auto border-2 font-semibold mb-4;
     }
 
     #prices-article,
@@ -410,7 +436,7 @@ li, .li{
     }
     
     .price-action-button {
-      @apply font-bold !text-base lg:!text-xl border-2 py-3 text-center lg:py-4 min-w-65 md:min-w-80 lg:px-12 rounded-4xl bg-[var(--color-secondary)] hover:bg-[var(--color-hover)] shadow-[0px_4px_0_0_#000] transition-all duration-200;
+      @apply font-bold !text-base lg:!text-xl border-2 py-3 text-center lg:py-4 min-w-65 md:min-w-80 lg:px-12 rounded-4xl bg-[var(--color-secondary)] hover:bg-[var(--color-hover)] shadow-[var(--shadow)] transition-all duration-200;
     }
 
 
@@ -430,3 +456,49 @@ li, .li{
       @apply left-55 top-8 md:top-3 md:left-85 md:!w-25 -scale-x-100 lg:left-110 lg:top-16 xl:left-0 xl:top-17;
     }
 
+
+    /* character creator */
+
+    .tabs-nav{
+      @apply flex items-center justify-center gap-4 border-y-1;
+    }
+    
+
+
+    .character-article h2, .character-preview h2{
+      @apply border-b-2 w-full text-center py-2;
+    }
+
+    .img-container{
+      @apply relative border-2 rounded-lg h-35 w-25 flex items-end pb-2;
+    }
+
+    .img-container img {
+      @apply w-30 h-30 object-cover;
+    }
+    .img-container i {
+      @apply absolute -top-1 right-1 text-lg;
+    }
+    .img-container p {
+      @apply absolute -bottom-5 left-1;
+    }
+
+    .hint-div {
+      @apply flex items-center justify-center w-70 text-neutral-900 mt-4;
+    }
+
+
+    /* image uploader */
+
+        .dropzone {
+          @apply flex flex-col items-center justify-center gap-4 border-2 border-dashed border-neutral-400 rounded-3xl p-12 m-8 text-center cursor-pointer min-h-55 transition-all duration-200;
+        }
+        .dropzone svg{
+          @apply w-10 h-10 transition-colors text-gray-400 dark:text-neutral-500;
+        }
+        .dropzone.dragged, .dropzone:hover {
+          @apply border-neutral-400 bg-[var(--color-primary)];
+        }
+        .dropzone p{
+          @apply text-sm w-40 min-h-15;
+        }

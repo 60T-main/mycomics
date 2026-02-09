@@ -2,9 +2,15 @@
 
 import CollapsibleMenu from "./collapsible-menu";
 
+import Link from "next/link";
+
 import { useState, useEffect, useRef } from "react";
 
-export default function Header() {
+type HeaderProps = {
+  location: string;
+};
+
+export default function Header({ location }: HeaderProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -36,9 +42,9 @@ export default function Header() {
             <a className="header-prices" href="#prices-article">
               ფასები
             </a>
-            <a className="header-action" href="/">
+            <Link className="header-action" href="/create">
               შეკვეთა
-            </a>
+            </Link>
           </div>
           <button
             className="md:hidden"
