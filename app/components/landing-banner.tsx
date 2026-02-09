@@ -1,5 +1,7 @@
 import PlanCarousel from "./price-plan";
 
+import Link from "next/link";
+
 export default function LandingBanner() {
   return (
     <main className="landing-page">
@@ -25,9 +27,9 @@ export default function LandingBanner() {
             <p className="inline-font">
               შენ და შენი საყვარელი ადამიანები მთავარ როლში
             </p>
-            <a className="action-button z-5" href="/">
+            <Link className="action-button z-5" href="/create">
               შეუკვეთე შენი კომიქსი
-            </a>
+            </Link>
           </div>
           <img className="superman" src="/superman.png" alt="" />
           <img className="supergirl" src="/supergirl.png" alt="" />

@@ -1,4 +1,8 @@
+"use client";
+
 import type { Dispatch, SetStateAction } from "react";
+
+import Link from "next/link";
 
 type CollapsibleMenuProps = {
   setMenuOpen: Dispatch<SetStateAction<boolean>>;
@@ -25,9 +29,9 @@ export default function CollapsibleMenu({
             <a href="#steps-article">როგორ მუშაობს</a>
           </li>
           <li onClick={() => setMenuOpen(false)}>
-            <a className="header-action-menu" href="#prices-article">
-              შეუკვეთე
-            </a>
+            <Link className="header-action-menu" href="/create">
+              შეკვეთა
+            </Link>
           </li>
         </ul>
       </nav>

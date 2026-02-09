@@ -33,15 +33,15 @@ export default function Header({ location }: HeaderProps) {
       <div className="shine"></div>
       <div className="header-content">
         <div className="dock h-20">
-          <img
-            className="header-logo"
-            src="logo.png"
-            alt="website logo 'mycomics.ge'"
-          />
+          <Link href="/">
+            <img
+              className="header-logo"
+              src="logo.png"
+              alt="website logo 'mycomics.ge'"
+            />
+          </Link>
+
           <div className="header-links">
-            <a className="header-prices" href="#prices-article">
-              ფასები
-            </a>
             <Link className="header-action" href="/create">
               შეკვეთა
             </Link>
