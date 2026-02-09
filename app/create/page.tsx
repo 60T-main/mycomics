@@ -4,6 +4,7 @@ import ImageUpload from "../components/image-upload";
 
 import Header from "../components/header";
 import Footer from "../components/footer";
+
 import "../globals.css";
 
 import { useState, useEffect } from "react";
@@ -19,12 +20,13 @@ export default function CreatePage() {
   return (
     <>
       <Header location={"edit"}></Header>
-      <main className="edit-page py-25">
+
+      <main className="edit-page">
         <section
           id="tab-characters"
           role="tabpanel"
           aria-labelledby="tab-characters-btn"
-          className="edit-section flex flex-col items-center justify-center gap-4"
+          className="edit-section flex flex-col items-center justify-center gap-10 md:gap-20"
         >
           <article className="character-preview flex flex-col items-center justify-center bg-gray border-2 w-9/10 rounded-3xl shadow-[var(--shadow)]">
             <h2>ჩემი პერსონაჟები</h2>

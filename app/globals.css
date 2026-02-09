@@ -122,27 +122,7 @@ li, .li{
     transition: all 0.4s cubic-bezier (0.175,0.885,0.32,2.2);
   }
 
-  .footer{
-    @apply !fixed relative z-99999999 w-full bottom-0 h-16 bg-none flex items-center justify-center border-t-1 border-neutral-500;
-    
-  }
 
-  .footer-content {
-    @apply relative bg-none w-full;
-  }
-  .footer-content nav{
-    @apply flex items-center justify-around mb-4;
-  }
-  .footer-content nav button{
-    @apply flex flex-col text-sm min-w-30;
-  }
-  .footer-content nav button i{
-    @apply text-lg;
-  }
-
-        .footer-content nav button.active {
-          @apply text-[var(--color-primary)];
-        }
 
 
   .effect{
@@ -210,7 +190,7 @@ li, .li{
     @apply flex gap-4;  
   }
 
-  header i{
+  .header-content i{
     @apply text-black text-3xl flex md:hidden;
   }
 
@@ -459,10 +439,39 @@ li, .li{
 
     /* character creator */
 
-    .tabs-nav{
-      @apply flex items-center justify-center gap-4 border-y-1;
+    .footer {
+      @apply !fixed md:hidden relative z-99999999 w-full bottom-0 h-16 bg-none flex items-center justify-center border-t-1 border-neutral-500;
+
     }
-    
+
+    .footer-content {
+      @apply relative bg-none w-full;
+    }
+
+    .footer-content nav{
+      @apply flex items-center justify-around mb-4;
+    }
+
+    .footer-content nav button, .edit-nav button {
+      @apply flex flex-col text-sm min-w-30;
+    }
+
+    .footer-content nav button i,.edit-nav button i {
+      @apply text-lg;
+    }
+
+    .footer-content nav button.active {
+      @apply text-[var(--color-primary)];
+    }
+
+    .edit-nav{
+      @apply hidden md:flex border-b-1 border-neutral-300 items-center justify-around h-20 relative z-99999999;
+    }
+
+    .edit-page {
+      @apply py-30 md:pt-50 md:pb-20;
+    }
+
 
 
     .character-article h2, .character-preview h2{
@@ -487,6 +496,11 @@ li, .li{
       @apply flex items-center justify-center w-70 text-neutral-900 mt-4;
     }
 
+
+    /* edit nav bar */
+    .edit-nav button{
+      @apply cursor-pointer;
+    }
 
     /* image uploader */
 

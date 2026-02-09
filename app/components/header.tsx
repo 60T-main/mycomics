@@ -1,6 +1,7 @@
 "use client";
 
 import CollapsibleMenu from "./collapsible-menu";
+import EditPageNav from "../components/edit-page-nav";
 
 import Link from "next/link";
 
@@ -56,6 +57,7 @@ export default function Header({ location }: HeaderProps) {
         </div>
         <CollapsibleMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       </div>
+      {location === "edit" && <EditPageNav></EditPageNav>}
     </header>
   );
 }
