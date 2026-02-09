@@ -5,7 +5,7 @@ import "./globals.css";
 export default function Home() {
   return (
     <>
-      <Header></Header>
+      <Header location="home"></Header>
       <LandingBanner />
     </>
   );
