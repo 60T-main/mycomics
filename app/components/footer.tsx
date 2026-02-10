@@ -1,6 +1,9 @@
 "use client";
 
+import { useSelectSectionStore } from "../store/useSelectSectionStore";
+
 export default function Footer() {
+  const { section, setSection } = useSelectSectionStore();
   return (
     <footer className="footer">
       <div className="effect"></div>
@@ -14,6 +17,10 @@ export default function Footer() {
             aria-selected="true"
             aria-controls="tab-characters"
             tabIndex={0}
+            onClick={() => {
+              setSection("character");
+            }}
+            className={section === "character" ? "active" : ""}
           >
             <i className="bi bi-person-fill-add"></i>
             პერსონაჟები
@@ -24,7 +31,10 @@ export default function Footer() {
             aria-selected="false"
             aria-controls="tab-cover"
             tabIndex={-1}
-            className="active"
+            onClick={() => {
+              setSection("cover");
+            }}
+            className={section === "cover" ? "active" : ""}
           >
             <i className="bi bi-book-half"></i>
             ყდა
@@ -35,6 +45,10 @@ export default function Footer() {
             aria-selected="false"
             aria-controls="tab-pages"
             tabIndex={-1}
+            onClick={() => {
+              setSection("pages");
+            }}
+            className={section === "pages" ? "active" : ""}
           >
             <i className="bi bi-book"></i>
             გვერდები

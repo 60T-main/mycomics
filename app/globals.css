@@ -118,7 +118,7 @@ li, .li{
 @layer components {
 
   header{
-    @apply flex flex-col justify-center px-4 lg:px-12 min-h-20 bg-none !fixed z-99999999 w-full relative border-b-1 border-neutral-500;
+    @apply flex flex-col justify-center min-h-20 bg-none !fixed z-99999999 w-full relative border-b-1 border-neutral-500;
     transition: all 0.4s cubic-bezier (0.175,0.885,0.32,2.2);
   }
 
@@ -144,6 +144,10 @@ li, .li{
 
   .header-content, .footer-content{
     @apply z-3;
+  }
+
+  .header-content{
+    @apply px-4 lg:px-12;
   }
 
   .dock{
@@ -445,31 +449,41 @@ li, .li{
     }
 
     .footer-content {
-      @apply relative bg-none w-full;
+      @apply relative bg-none w-full h-full;
     }
 
     .footer-content nav{
-      @apply flex items-center justify-around mb-4;
+      @apply flex items-center justify-around h-full;
     }
 
     .footer-content nav button, .edit-nav button {
-      @apply flex flex-col text-sm min-w-30;
+      @apply flex flex-col text-sm min-w-30 cursor-pointer w-full h-full transition-all duration-100 border-x-1 border-neutral-300;
+    }
+    .edit-nav button {
+      @apply items-center justify-center;
+    }
+
+    .footer-content nav button:first-child, .edit-nav button:first-child {
+      @apply border-l-0 ;
+    }
+    .footer-content nav button:last-child, .edit-nav button:last-child {
+      @apply border-r-0;
     }
 
     .footer-content nav button i,.edit-nav button i {
       @apply text-lg;
     }
 
-    .footer-content nav button.active {
-      @apply text-[var(--color-primary)];
+    .footer-content nav button.active,.edit-nav button.active {
+      @apply bg-[var(--color-primary)];
     }
 
     .edit-nav{
-      @apply hidden md:flex border-b-1 border-neutral-300 items-center justify-around h-20 relative z-99999999;
+      @apply hidden md:flex border-y-1 border-neutral-300 items-center justify-between h-16 relative z-99999999 cursor-pointer;
     }
 
     .edit-page {
-      @apply py-30 md:pt-50 md:pb-20;
+      @apply py-30 md:pt-42 md:pb-0;
     }
 
 
@@ -479,28 +493,48 @@ li, .li{
     }
 
     .img-container{
-      @apply relative border-2 rounded-lg h-35 w-25 flex items-end pb-2;
+      @apply relative border-2 rounded-lg h-35 w-25 flex items-end pb-2 md:w-40 md:h-40;
     }
 
     .img-container img {
-      @apply w-30 h-30 object-cover;
+      @apply object-cover w-full h-full;
     }
     .img-container i {
       @apply absolute -top-1 right-1 text-lg;
     }
     .img-container p {
-      @apply absolute -bottom-5 left-1;
+      @apply absolute font-bold -bottom-5 left-1 md:-bottom-7 lg:bottom-0 lg:-top-7;
     }
 
     .hint-div {
       @apply flex items-center justify-center w-70 text-neutral-900 mt-4;
     }
 
-
-    /* edit nav bar */
-    .edit-nav button{
-      @apply cursor-pointer;
+    .character-upload-content{
+      @apply lg:h-170
     }
+
+    .character-article, .character-preview{
+      @apply w-9/10 md:w-8/10 xl:w-4/10;
+    }
+
+    .character-article{
+      @apply flex flex-col items-center justify-center border-2  rounded-3xl shadow-[var(--shadow)];
+    }
+
+    .character-preview{
+      @apply flex flex-col items-center justify-center border-2 rounded-3xl shadow-[var(--shadow)];
+    }
+
+    .edit-section{
+      @apply flex flex-col items-center justify-center gap-10 md:gap-20 lg:flex-row-reverse lg:mx-12;
+    }
+
+    .characters-div{
+      @apply flex flex-row items-center justify-center py-12 min-h-60 gap-2 lg:h-170 lg:flex-col lg:gap-8;
+    }
+
+
 
     /* image uploader */
 

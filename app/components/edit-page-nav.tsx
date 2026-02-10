@@ -1,6 +1,16 @@
 "use client";
 
+import { useSelectSectionStore } from "../store/useSelectSectionStore";
+
+import { useEffect } from "react";
+
 export default function EditPageNav() {
+  const { section, setSection } = useSelectSectionStore();
+
+  useEffect(() => {
+    console.log(section);
+  }, [section]);
+
   return (
     <nav aria-label="Editor tabs" className="edit-nav">
       <button
@@ -9,6 +19,10 @@ export default function EditPageNav() {
         aria-selected="true"
         aria-controls="tab-characters"
         tabIndex={0}
+        className={section === "character" ? "active" : ""}
+        onClick={() => {
+          setSection("character");
+        }}
       >
         <i className="bi bi-person-fill-add"></i>
         პერსონაჟები
@@ -19,7 +33,10 @@ export default function EditPageNav() {
         aria-selected="false"
         aria-controls="tab-cover"
         tabIndex={-1}
-        className="active"
+        className={section === "cover" ? "active" : ""}
+        onClick={() => {
+          setSection("cover");
+        }}
       >
         <i className="bi bi-book-half"></i>
         ყდა
@@ -30,6 +47,10 @@ export default function EditPageNav() {
         aria-selected="false"
         aria-controls="tab-pages"
         tabIndex={-1}
+        className={section === "pages" ? "active" : ""}
+        onClick={() => {
+          setSection("pages");
+        }}
       >
         <i className="bi bi-book"></i>
         გვერდები
