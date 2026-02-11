@@ -21,21 +21,24 @@ export default function CharacterEditSection() {
     >
       <article className="character-preview">
         <h2>ჩემი პერსონაჟები</h2>
-        <div className="characters-div">
-          <div className="img-container">
-            <img src="/supergirl.png" alt="" />
-            <p>ანა</p>
-            <i className="bi bi-three-dots"></i>
-          </div>
-          <div className="img-container">
-            <img src="/superman.png" alt="" />
-            <p>ნიკა</p>
-            <i className="bi bi-three-dots"></i>
-          </div>
-          <div className="img-container">
-            <img src="/supergirl-drawing.png" alt="" />
-            <p>ბცმცი</p>
-            <i className="bi bi-three-dots"></i>
+        <div className="characters-content">
+          <div className="characters-screen"></div>
+          <div className="characters-div">
+            <div className="img-container">
+              <img src="/supergirl.png" alt="" />
+              <p>ანა</p>
+              <i className="bi bi-three-dots"></i>
+            </div>
+            <div className="img-container">
+              <img src="/superman.png" alt="" />
+              <p>ნიკა</p>
+              <i className="bi bi-three-dots"></i>
+            </div>
+            <div className="img-container">
+              <img src="/supergirl-drawing.png" alt="" />
+              <p>ბცმცი</p>
+              <i className="bi bi-three-dots"></i>
+            </div>
           </div>
         </div>
       </article>
@@ -78,7 +81,7 @@ export default function CharacterEditSection() {
                 </label>
 
                 <label className="flex flex-col gap-2">
-                  <span>ტანსაცმელი</span>
+                  <span>სქესი</span>
                   <select
                     name="characterClothes"
                     className="border-2 rounded-xl px-3 py-2"
@@ -86,11 +89,10 @@ export default function CharacterEditSection() {
                     required
                   >
                     <option value="" disabled>
-                      აირჩიე ტანსაცმელი
+                      აირჩიე სქესი
                     </option>
-                    <option value="casual">ყოველდღიური</option>
-                    <option value="formal">ოფიციალური</option>
-                    <option value="sport">სპორტული</option>
+                    <option value="casual">მდედრობითი</option>
+                    <option value="formal">მამრობითი</option>
                   </select>
                 </label>
 

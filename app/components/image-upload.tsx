@@ -37,7 +37,7 @@ function ImageUpload({ setUploaded }: SetUploadedProps) {
     };
   }, [previews]);
   return (
-    <div className="w-full">
+    <div className="w-full lg:h-75 flex flex-col lg:flex-row justify-center">
       <div
         {...getRootProps({
           className: !isDragActive ? "dropzone" : "dropzone dragged",
@@ -60,7 +60,7 @@ function ImageUpload({ setUploaded }: SetUploadedProps) {
       </div>
 
       {previews.length > 0 && (
-        <div className="mt-2 grid grid-cols-3 gap-3 mx-6">
+        <div className="mt-2 grid grid-cols-3 gap-3 mx-6 lg:grid-cols-1">
           {previews.map((src, index) => (
             <div key={src} className="relative">
               <button
@@ -74,7 +74,7 @@ function ImageUpload({ setUploaded }: SetUploadedProps) {
               <img
                 src={src}
                 alt={`Uploaded preview ${index + 1}`}
-                className="h-24 w-full object-cover rounded-xl border-2"
+                className="h-24 w-full object-cover rounded-xl border-2 lg:h-24"
               />
             </div>
           ))}

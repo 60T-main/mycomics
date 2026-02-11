@@ -483,20 +483,29 @@ li, .li{
     }
 
     .edit-page {
-      @apply py-30 md:pt-42 md:pb-0;
+      @apply py-25 md:pt-42 md:pb-0;
     }
 
-
-
-    .character-article h2, .character-preview h2{
-      @apply border-b-2 w-full text-center py-2;
+    .cover-templates{
+      @apply grid grid-cols-2 gap-8 py-4;
     }
 
+    
     .img-container{
-      @apply relative border-2 rounded-lg h-35 w-25 flex items-end pb-2 md:w-40 md:h-40;
+      @apply relative border-2 rounded-lg h-35 w-25 flex items-end md:w-40 md:h-40 lg:w-28 lg:h-28;
     }
-
-    .img-container img {
+    .img-container.pages{
+      @apply h-25 w-20 md:w-40 md:h-40 lg:w-30 lg:h-30;
+    }
+    .img-container.cover{
+      @applys h-35 w-35 md:w-40 md:h-40 lg:w-30 lg:h-30 !rounded-none;
+    }
+    
+    .cover-container{
+      @apply w-70 m-2 rounded-none border-2;
+    }
+    
+    .img-container img, .cover-container img {
       @apply object-cover w-full h-full;
     }
     .img-container i {
@@ -505,35 +514,38 @@ li, .li{
     .img-container p {
       @apply absolute font-bold -bottom-5 left-1 md:-bottom-7 lg:bottom-0 lg:-top-7;
     }
-
+    
     .hint-div {
-      @apply flex items-center justify-center w-70 text-neutral-900 mt-4;
+      @apply flex items-center justify-center w-70 text-neutral-900 mt-4 w-80;
+    }
+    
+    .character-upload-content, .cover-create-content,.cover-div, .characters-content{
+      @apply lg:h-170 w-full flex flex-col items-center;
     }
 
-    .character-upload-content{
-      @apply lg:h-170
+    .character-article, .character-preview, .cover-article , .cover-preview, .pages-preview{
+      @apply w-9/10 md:w-8/10 xl:w-4/10 flex flex-col items-center justify-center border-2 rounded-3xl shadow-[var(--shadow)];
     }
-
-    .character-article, .character-preview{
-      @apply w-9/10 md:w-8/10 xl:w-4/10;
+    
+    .character-article h2, .character-preview h2, .cover-article h2,
+    .cover-preview h2, .pages-preview h2{
+      @apply border-b-2 w-full text-center py-2;
     }
-
-    .character-article{
-      @apply flex flex-col items-center justify-center border-2  rounded-3xl shadow-[var(--shadow)];
-    }
-
-    .character-preview{
-      @apply flex flex-col items-center justify-center border-2 rounded-3xl shadow-[var(--shadow)];
-    }
-
+    
     .edit-section{
       @apply flex flex-col items-center justify-center gap-10 md:gap-20 lg:flex-row-reverse lg:mx-12;
     }
-
+    
     .characters-div{
-      @apply flex flex-row items-center justify-center py-12 min-h-60 gap-2 lg:h-170 lg:flex-col lg:gap-8;
+      @apply flex flex-row items-center justify-center py-12 gap-2 lg:gap-6 xl:gap-12 ;
     }
 
+   
+
+    .characters-screen{
+      @apply hidden lg:flex h-2/3 w-full border-b-2;
+    }
+    
 
 
     /* image uploader */
