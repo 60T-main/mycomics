@@ -2,16 +2,41 @@
 
 import ImageUpload from "../components/image-upload";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function CharacterEditSection() {
   const [uploaded, setUploaded] = useState(false);
+
+  const [openCardId, setOpenCardId] = useState<string | null>(null);
+
+  const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  const DropdownTrigger = (elementId: string) => {
+    setOpenCardId(openCardId === elementId ? null : elementId);
+  };
 
   useEffect(() => {
     uploaded && setErrorMessage(null);
   }, [uploaded]);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      const isClickInsideCard = target
+        ? Object.values(cardRefs.current).some(
+            (cardRef) => cardRef && cardRef.contains(target),
+          )
+        : false;
+      if (!isClickInsideCard) {
+        setOpenCardId(null);
+      }
+    };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
+
   return (
     <section
       id="tab-characters"
@@ -24,20 +49,86 @@ export default function CharacterEditSection() {
         <div className="characters-content">
           <div className="characters-screen"></div>
           <div className="characters-div">
-            <div className="img-container">
+            <div
+              className="img-container character"
+              key={"1"}
+              ref={(el) => {
+                if (el) cardRefs.current["1"] = el;
+              }}
+            >
               <img src="/supergirl.png" alt="" />
               <p>ანა</p>
-              <i className="bi bi-three-dots"></i>
+              <i
+                className="bi bi-three-dots"
+                onClick={() => {
+                  DropdownTrigger("1");
+                }}
+              ></i>
+              <div
+                className={`dropdown character ${openCardId != "1" ? "hidden" : ""}`}
+              >
+                <div className="effect"></div>
+                <div className="tint"></div>
+                <div className="shine"></div>
+                <div className="dropdown-content">
+                  <button className="edit">რედაქტირება</button>
+                  <button className="delete">წაშლა</button>
+                </div>
+              </div>
             </div>
-            <div className="img-container">
+            <div
+              className="img-container character"
+              key={"2"}
+              ref={(el) => {
+                if (el) cardRefs.current["2"] = el;
+              }}
+            >
               <img src="/superman.png" alt="" />
               <p>ნიკა</p>
-              <i className="bi bi-three-dots"></i>
+              <i
+                className="bi bi-three-dots"
+                onClick={() => {
+                  DropdownTrigger("2");
+                }}
+              ></i>
+              <div
+                className={`dropdown character ${openCardId != "2" ? "hidden" : ""}`}
+              >
+                <div className="effect"></div>
+                <div className="tint"></div>
+                <div className="shine"></div>
+                <div className="dropdown-content">
+                  <button className="edit">რედაქტირება</button>
+                  <button className="delete">წაშლა</button>
+                </div>
+              </div>
             </div>
-            <div className="img-container">
+            <div
+              className="img-container character"
+              key={"3"}
+              ref={(el) => {
+                if (el) cardRefs.current["3"] = el;
+              }}
+            >
               <img src="/supergirl-drawing.png" alt="" />
               <p>ბცმცი</p>
-              <i className="bi bi-three-dots"></i>
+              <i
+                className="bi bi-three-dots"
+                onClick={() => {
+                  DropdownTrigger("3");
+                }}
+              ></i>
+              <div
+                className={`dropdown character ${openCardId != "3" ? "hidden" : ""}`}
+              >
+                <div className="effect"></div>
+                <div className="tint"></div>
+                <div className="shine"></div>
+                <div className="dropdown-content">
+                  <button className="edit">რედაქტირება</button>
+                  <button className="delete">წაშლა</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -48,7 +139,7 @@ export default function CharacterEditSection() {
           <ImageUpload setUploaded={setUploaded}></ImageUpload>
           <div className="hint-div">
             <p>
-              *რჩევა: <br />
+              <b>*რჩევა:</b> <br />
               საუკეთესო შედეგისთვის გამოიყენე ფოტო, სადაც სახე მკაფიოდ ჩანს.
             </p>
           </div>

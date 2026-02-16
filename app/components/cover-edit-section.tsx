@@ -20,10 +20,12 @@ export default function CoverEditSection() {
       className="edit-section"
     >
       <article className="cover-preview">
-        <h2>ჩემი წიგნის ყდა</h2>
-        <div className="cover-div">
-          <div className="cover-container">
-            <img src="/style-dramatic.jpeg" alt="" />
+        <div className="cover-content">
+          <h2>ჩემი წიგნის ყდა</h2>
+          <div className="cover-div">
+            <div className="cover-container">
+              <img src="/style-dramatic.jpeg" alt="" />
+            </div>
           </div>
         </div>
       </article>
@@ -51,7 +53,7 @@ export default function CoverEditSection() {
 
           <div className="hint-div">
             <p>
-              *რჩევა: <br />
+              <b>*რჩევა:</b> <br />
               აირჩიე ყდის დიზაინი, რომელიც ყველაზე მეტად შეესაბამება წიგნის
               განწყობას.
             </p>
