@@ -4,8 +4,22 @@ import ImageUpload from "./image-upload";
 
 import { useState, useEffect } from "react";
 
+import OptionsModal from "./options-modal";
+
+import { useSelectOptionsModalStore } from "../store/useOptionsModalStateStore";
+
+import {
+  useDropdownOutsideClick,
+  useDropdownTriggerStore,
+} from "../store/useDropdownTriggerStore";
+
 export default function PageEditSection() {
   const [uploaded, setUploaded] = useState(false);
+
+  const { openCardId, setOpenCardId } = useSelectOptionsModalStore();
+
+  const { DropdownTrigger } = useDropdownTriggerStore();
+  const { cardRefs } = useDropdownOutsideClick();
 
   useEffect(() => {
     uploaded && setErrorMessage(null);
@@ -25,10 +39,26 @@ export default function PageEditSection() {
           <div className="pages-preview-content min-h-110 w-full">
             <div className="pages-div">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="img-container pages">
+                <div
+                  key={i + 12345}
+                  className="img-container pages"
+                  ref={(el) => {
+                    if (el) cardRefs.current[String(i + 12345)] = el;
+                  }}
+                >
                   <img src="/supergirl.png" alt="" />
-                  <i className="bi bi-three-dots"></i>
+                  <i
+                    onClick={() => {
+                      DropdownTrigger(String(i + 12345));
+                    }}
+                    className="bi bi-three-dots"
+                  ></i>
                   <p>{i + 1}</p>
+                  <div
+                    className={`${openCardId != String(i + 12345) ? "hidden" : ""}`}
+                  >
+                    <OptionsModal></OptionsModal>
+                  </div>
                 </div>
               ))}
             </div>

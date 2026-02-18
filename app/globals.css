@@ -568,15 +568,17 @@ li, .li{
      @apply border-2 border-black;
     }
     .dropdown button{
-      @apply font-bold text-sm md:text-base select-none w-full;
+      @apply text-sm md:text-base select-none w-full;
     }
     .dropdown.character{
-      @apply absolute top-4 left-10 w-25 h-20 md:w-35 md:h-25; 
+      @apply absolute top-4 -left-1 md:left-10 w-30 h-23 md:w-35 md:h-25; 
     }
 
     .delete{
-      @apply text-red-500 mt-2 pt-2 border-t-2 border-neutral-400;
+      @apply text-red-500 mt-2 pt-2 border-t-2 border-neutral-400 font-bold;
     }
+
+
 
     .dropdown-content{
       @apply relative z-1 flex items-center justify-center pt-3 flex-col gap-2;
@@ -596,6 +598,22 @@ li, .li{
 
     .characters-screen{
       @apply hidden lg:flex h-110 w-full border-b-2;
+    }
+
+
+    /* Modal */
+
+    .modal-overlay{
+      @apply absolute w-full h-full top-0 z-99999999999 backdrop-blur-xs;
+    }
+    .modal-content{
+      @apply flex items-center justify-center z-99999 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 relative;
+    }
+    .modal-content img{
+      @apply w-80 border-2;
+    }
+    .modal-content button{
+      @apply absolute top-2 right-14 text-2xl;
     }
     
 

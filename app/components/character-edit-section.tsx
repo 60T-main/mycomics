@@ -1,41 +1,34 @@
 "use client";
 
+import Modal from "./modal";
+import { useSelectModalStore } from "../store/useModalStateStore";
+
 import ImageUpload from "../components/image-upload";
 
 import { useState, useEffect, useRef } from "react";
 
+import { useSelectOptionsModalStore } from "../store/useOptionsModalStateStore";
+import {
+  useDropdownOutsideClick,
+  useDropdownTriggerStore,
+} from "../store/useDropdownTriggerStore";
+
+import OptionsModal from "./options-modal";
+
 export default function CharacterEditSection() {
   const [uploaded, setUploaded] = useState(false);
 
-  const [openCardId, setOpenCardId] = useState<string | null>(null);
+  const { open, setOpen } = useSelectModalStore();
 
-  const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
-  const DropdownTrigger = (elementId: string) => {
-    setOpenCardId(openCardId === elementId ? null : elementId);
-  };
+  const { openCardId } = useSelectOptionsModalStore();
+  const { DropdownTrigger } = useDropdownTriggerStore();
+  const { cardRefs } = useDropdownOutsideClick();
 
   useEffect(() => {
     uploaded && setErrorMessage(null);
   }, [uploaded]);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    const close = (e: MouseEvent) => {
-      const target = e.target as Node | null;
-      const isClickInsideCard = target
-        ? Object.values(cardRefs.current).some(
-            (cardRef) => cardRef && cardRef.contains(target),
-          )
-        : false;
-      if (!isClickInsideCard) {
-        setOpenCardId(null);
-      }
-    };
-    document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
-  }, []);
 
   return (
     <section
@@ -44,6 +37,12 @@ export default function CharacterEditSection() {
       aria-labelledby="tab-characters-btn"
       className="edit-section"
     >
+      {open && (
+        <Modal onClose={() => setOpen(false)}>
+          <img src="/supergirl-drawing.png" />
+          <button onClick={() => setOpen(false)}>X</button>
+        </Modal>
+      )}
       <article className="character-preview">
         <h2>ჩემი პერსონაჟები</h2>
         <div className="characters-content">
@@ -56,7 +55,7 @@ export default function CharacterEditSection() {
                 if (el) cardRefs.current["1"] = el;
               }}
             >
-              <img src="/supergirl.png" alt="" />
+              <img onClick={() => setOpen(true)} src="/supergirl.png" alt="" />
               <p>ანა</p>
               <i
                 className="bi bi-three-dots"
@@ -64,16 +63,8 @@ export default function CharacterEditSection() {
                   DropdownTrigger("1");
                 }}
               ></i>
-              <div
-                className={`dropdown character ${openCardId != "1" ? "hidden" : ""}`}
-              >
-                <div className="effect"></div>
-                <div className="tint"></div>
-                <div className="shine"></div>
-                <div className="dropdown-content">
-                  <button className="edit">რედაქტირება</button>
-                  <button className="delete">წაშლა</button>
-                </div>
+              <div className={`${openCardId != "1" ? "hidden" : ""}`}>
+                <OptionsModal></OptionsModal>
               </div>
             </div>
             <div
@@ -83,7 +74,7 @@ export default function CharacterEditSection() {
                 if (el) cardRefs.current["2"] = el;
               }}
             >
-              <img src="/superman.png" alt="" />
+              <img onClick={() => setOpen(true)} src="/superman.png" alt="" />
               <p>ნიკა</p>
               <i
                 className="bi bi-three-dots"
@@ -91,16 +82,8 @@ export default function CharacterEditSection() {
                   DropdownTrigger("2");
                 }}
               ></i>
-              <div
-                className={`dropdown character ${openCardId != "2" ? "hidden" : ""}`}
-              >
-                <div className="effect"></div>
-                <div className="tint"></div>
-                <div className="shine"></div>
-                <div className="dropdown-content">
-                  <button className="edit">რედაქტირება</button>
-                  <button className="delete">წაშლა</button>
-                </div>
+              <div className={`${openCardId != "2" ? "hidden" : ""}`}>
+                <OptionsModal></OptionsModal>
               </div>
             </div>
             <div
@@ -110,7 +93,11 @@ export default function CharacterEditSection() {
                 if (el) cardRefs.current["3"] = el;
               }}
             >
-              <img src="/supergirl-drawing.png" alt="" />
+              <img
+                onClick={() => setOpen(true)}
+                src="/supergirl-drawing.png"
+                alt=""
+              />
               <p>ბცმცი</p>
               <i
                 className="bi bi-three-dots"
@@ -118,16 +105,8 @@ export default function CharacterEditSection() {
                   DropdownTrigger("3");
                 }}
               ></i>
-              <div
-                className={`dropdown character ${openCardId != "3" ? "hidden" : ""}`}
-              >
-                <div className="effect"></div>
-                <div className="tint"></div>
-                <div className="shine"></div>
-                <div className="dropdown-content">
-                  <button className="edit">რედაქტირება</button>
-                  <button className="delete">წაშლა</button>
-                </div>
+              <div className={`${openCardId != "3" ? "hidden" : ""}`}>
+                <OptionsModal></OptionsModal>
               </div>
             </div>
           </div>

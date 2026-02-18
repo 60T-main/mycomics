@@ -8,9 +8,11 @@ import PageEditSection from "../components/page-edit-section";
 
 import { useSelectSectionStore } from "../store/useSelectSectionStore";
 
+import { useSelectModalStore } from "../store/useModalStateStore";
+
 import "../globals.css";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 export default function CreatePage() {
   const { section, setSection } = useSelectSectionStore();
@@ -25,6 +27,16 @@ export default function CreatePage() {
       behavior: "smooth",
     });
   };
+
+  const { open } = useSelectModalStore();
+
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add("overflow-y-hidden");
+    } else {
+      document.body.classList.remove("overflow-y-hidden");
+    }
+  }, [open]);
 
   return (
     <>
