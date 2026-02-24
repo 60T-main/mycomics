@@ -10,12 +10,19 @@ import { useSelectSectionStore } from "../store/useSelectSectionStore";
 
 import { useSelectModalStore } from "../store/useModalStateStore";
 
+import {
+  useScreenSizeListener,
+  useScreenSizeStore,
+} from "@/app/store/useScreenSizeStore";
+
 import "../globals.css";
 
 import { useEffect } from "react";
 
 export default function CreatePage() {
+  useScreenSizeListener();
   const { section, setSection } = useSelectSectionStore();
+  const { isLgUp } = useScreenSizeStore();
 
   useEffect(() => {
     scrollToTop();
@@ -31,12 +38,12 @@ export default function CreatePage() {
   const { open } = useSelectModalStore();
 
   useEffect(() => {
-    if (open) {
+    if (open && !isLgUp) {
       document.body.classList.add("overflow-y-hidden");
-    } else {
+    } else if (!open && !isLgUp) {
       document.body.classList.remove("overflow-y-hidden");
     }
-  }, [open]);
+  }, [open, isLgUp]);
 
   return (
     <>

@@ -3,7 +3,7 @@
 import Modal from "./modal";
 import { useSelectModalStore } from "../store/useModalStateStore";
 
-import ImageUpload from "../components/image-upload";
+import ImageUpload from "./image-upload";
 
 import { useState, useEffect, useRef } from "react";
 
@@ -13,9 +13,13 @@ import {
   useDropdownTriggerStore,
 } from "../store/useDropdownTriggerStore";
 
+import { useScreenSizeStore } from "@/app/store/useScreenSizeStore";
+
 import OptionsModal from "./options-modal";
 
 export default function CharacterEditSection() {
+  const { isLgUp } = useScreenSizeStore();
+
   const [uploaded, setUploaded] = useState(false);
 
   const { open, setOpen } = useSelectModalStore();
@@ -37,16 +41,18 @@ export default function CharacterEditSection() {
       aria-labelledby="tab-characters-btn"
       className="edit-section"
     >
-      {open && (
+      {open && !isLgUp && (
         <Modal onClose={() => setOpen(false)}>
-          <img src="/supergirl-drawing.png" />
           <button onClick={() => setOpen(false)}>X</button>
+          <img src="/supergirl-drawing.png" />
         </Modal>
       )}
       <article className="character-preview">
         <h2>ჩემი პერსონაჟები</h2>
         <div className="characters-content">
-          <div className="characters-screen"></div>
+          <div className="characters-screen">
+            {isLgUp && <img src="/supergirl-drawing.png" />}
+          </div>
           <div className="characters-div">
             <div
               className="img-container character"

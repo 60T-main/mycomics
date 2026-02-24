@@ -1,7 +1,7 @@
 "use client";
 
 import CollapsibleMenu from "./collapsible-menu";
-import EditPageNav from "../components/edit-page-nav";
+import EditPageNav from "./edit-page-nav";
 
 import Link from "next/link";
 

@@ -68,6 +68,27 @@ export default function PageEditSection() {
       <article className="cover-article">
         <h2>გვერდის დამატება</h2>
         <div className="cover-create-content">
+          <h3 className="mt-4 font-bold">აირჩიეთ გვერდის შაბლონი</h3>
+          <div className="page-templates-parent">
+            <div className="cover-templates">
+              <div className="img-container cover">
+                <img src="/style-normal.jpeg" alt="" />
+                <p>📖კლასიკური</p>
+              </div>
+              <div className="img-container cover">
+                <img src="/style-drawn.jpeg" alt="" />
+                <p>⚡მოქმედებითი</p>
+              </div>
+              <div className="img-container cover">
+                <img src="/style-classic.jpeg" alt="" />
+                <p>❤️რომანტიკული</p>
+              </div>
+              <div className="img-container cover">
+                <img src="/style-dramatic.jpeg" alt="" />
+                <p>🎬დრამატული</p>
+              </div>
+            </div>
+          </div>
           <div className="hint-div">
             <p>
               <b>*რჩევა:</b> <br />

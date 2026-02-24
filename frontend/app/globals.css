@@ -554,7 +554,7 @@ li, .li{
     }
 
     .pages-preview{
-      @apply lg:relative w-9/10 md:w-8/10 lg:w-7/10 flex lg:h-full;
+      @apply lg:relative w-9/10 md:w-8/10 lg:w-7/10 flex lg:h-269;
     }
 
     .dropdown.hidden{
@@ -597,7 +597,7 @@ li, .li{
     }
 
     .characters-screen{
-      @apply hidden lg:flex h-110 w-full border-b-2;
+      @apply hidden lg:flex lg:justify-center lg:h-110 lg:w-full lg:border-b-2;
     }
 
 
@@ -607,13 +607,12 @@ li, .li{
       @apply absolute w-full h-full top-0 z-99999999999 backdrop-blur-xs;
     }
     .modal-content{
-      @apply flex items-center justify-center z-99999 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 relative;
-    }
+      @apply flex items-center justify-center z-99999 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 relative border-2 w-9/10}
     .modal-content img{
-      @apply w-80 border-2;
+      @apply w-80 ;
     }
     .modal-content button{
-      @apply absolute top-2 right-14 text-2xl;
+      @apply absolute top-2 right-3 text-3xl;
     }
     
 
