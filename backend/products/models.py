@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from customers.models import Customer
 
 import uuid
@@ -8,7 +9,15 @@ import uuid
 class Character(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    user = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="characters")
+    user = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name="characters",
+        null=True,
+        blank=True,
+    )
+    created_by_anon_token = models.UUIDField(null=True, blank=True)
+
     book = models.ForeignKey("Book", on_delete=models.CASCADE, related_name="characters")
     name = models.CharField(max_length=100)
 
@@ -37,7 +46,7 @@ class CharacterVersion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     character = models.ForeignKey(Character, related_name="versions", on_delete=models.CASCADE)
-    version_number = models.PositiveIntegerField()
+    version_number = models.PositiveIntegerField(null=True, blank=True)
 
     # Generated Output
     generated_image = models.ImageField(upload_to="characters/")
@@ -92,7 +101,17 @@ class Book(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     # Ownership
-    user = models.ForeignKey(Customer, related_name="books", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        Customer,
+        related_name="books",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    session_key = models.CharField(
+        max_length=40, blank=True, null=True,
+        help_text="For anonymous book before login"
+    )
 
     # Title
     title = models.CharField(max_length=255)
@@ -126,7 +145,8 @@ class Book(models.Model):
     "CoverVersion",
     null=True,
     blank=True,
-    on_delete=models.SET_NULL
+    on_delete=models.SET_NULL,
+    related_name="+"
 )
 
     print_size = models.CharField(max_length=50, null=True, blank=True)
@@ -160,12 +180,21 @@ class Book(models.Model):
 class CoverVersion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
+    created_by_user = models.ForeignKey(
+        Customer,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="cover_versions",
+    )
+    created_by_anon_token = models.UUIDField(null=True, blank=True)
+
     book = models.ForeignKey(
     Book,
     related_name="cover_versions",
     on_delete=models.CASCADE
 )
-    version_number = models.PositiveIntegerField()
+    version_number = models.PositiveIntegerField(null=True, blank=True)
 
     # Title
     title_text = models.CharField(max_length=255)
@@ -296,3 +325,43 @@ class PageVersion(models.Model):
         indexes = [
         models.Index(fields=["page", "created_at"]),
     ]
+
+
+class AnonymousProfile(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = models.UUIDField(unique=True, editable=False)
+    ip_hash = models.CharField(max_length=64)
+    ua_hash = models.CharField(max_length=64)
+    book_creations = models.PositiveIntegerField(default=0)
+    character_creations = models.PositiveIntegerField(default=0)
+    character_generations = models.PositiveIntegerField(default=0)
+    cover_generations = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_seen_at = models.DateTimeField(default=timezone.now)
+
+
+class RetryAllowance(models.Model):
+    CONTENT_TYPES = [
+        ("CHARACTER", "Character"),
+        ("COVER", "Cover"),
+        ("PAGE", "Page"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name="retry_allowances",
+    )
+    content_type = models.CharField(max_length=20, choices=CONTENT_TYPES)
+    content_id = models.UUIDField()
+    max_retries = models.PositiveIntegerField(default=0)
+    used_retries = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("user", "content_type", "content_id")
+        indexes = [
+            models.Index(fields=["user", "content_type", "content_id"]),
+        ]

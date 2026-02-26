@@ -20,7 +20,7 @@ from rest_framework.decorators import throttle_classes
 
 
 @api_view(['POST'])
-# @throttle_classes([AnonRateThrottle, UserRateThrottle])
+@throttle_classes([AnonRateThrottle, UserRateThrottle])
 def LoginView(request):
     login_value = request.data.get('username')  
     password = request.data.get('password')
@@ -67,7 +67,7 @@ def StatusView(request):
 
 
 @api_view(['POST'])
-# @throttle_classes([AnonRateThrottle, UserRateThrottle])
+@throttle_classes([AnonRateThrottle, UserRateThrottle])
 def RegisterView(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -161,7 +161,7 @@ def EditUser(request):
 # @throttle_classes([AnonRateThrottle, UserRateThrottle])
 def HandleAddress(request):
     user = None
-    session_key = None
+    anon_token = None
     full_name = request.data.get('full_name')
     phone = request.data.get('phone')
     email = request.data.get('email')
@@ -171,16 +171,18 @@ def HandleAddress(request):
 
     if request.user.is_authenticated:
         user = request.user
-    if not request.session.session_key:
-        request.session.save()
-    session_key = request.session.session_key
+    else:
+        anon_token = request.COOKIES.get("anon_token") or request.META.get(
+            "HTTP_X_ANONYMOUS_TOKEN"
+        )
+        if not anon_token:
+            return Response({"error": "Anonymous token required"}, status=400)
     
     if request.method == 'GET':
         if request.user.is_authenticated:
             address, created = Address.objects.get_or_create(user=user)
         else:
-            address, created = Address.objects.get_or_create(session_key=session_key)
-            print(session_key)
+            address, created = Address.objects.get_or_create(session_key=anon_token)
         
 
             
@@ -189,8 +191,8 @@ def HandleAddress(request):
 
     if request.method == 'POST':
         if not request.user.is_authenticated:
-            address, created = Address.objects.get_or_create    (session_key=session_key)
-            if address.session_key != session_key:
+            address, created = Address.objects.get_or_create(session_key=anon_token)
+            if address.session_key != anon_token:
                 return Response({"error": "Forbidden"}, status=403)
             address.full_name = full_name
             address.phone = phone
@@ -213,8 +215,8 @@ def HandleAddress(request):
 
     if request.method == 'PUT':
         if not request.user.is_authenticated:
-            address, created = Address.objects.get_or_create(session_key=session_key)
-            if address.session_key != session_key:
+            address, created = Address.objects.get_or_create(session_key=anon_token)
+            if address.session_key != anon_token:
                 return Response({"error": "Forbidden"}, status=403)
         else:
             address, created = Address.objects.get_or_create(user=user)

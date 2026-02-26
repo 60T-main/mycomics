@@ -44,7 +44,7 @@ class Purchase(models.Model):
     )
 
     book = models.OneToOneField(
-        "books.Book",
+        "products.Book",
         on_delete=models.CASCADE,
         related_name="purchase"
     )
@@ -104,7 +104,7 @@ class LedgerEntry(models.Model):
     )
 
     book = models.ForeignKey(
-        "books.Book",
+        "products.Book",
         on_delete=models.CASCADE,
         related_name="ledger_entries"
     )
