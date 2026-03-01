@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.text import slugify
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -39,7 +40,30 @@ from .services.retries import (
 	get_tier_limit_for_book,
 	serialize_tier,
 )
+from .services.generate_page import generate_page
 from orders.models import RetryPackOrder
+from orders.models import OrderItem
+
+
+def _build_unique_book_slug(title, *, user=None, session_key=None, exclude_id=None):
+	base_slug = slugify(title or "", allow_unicode=True) or "book"
+	queryset = Book.objects.all()
+
+	if user is not None:
+		queryset = queryset.filter(user=user)
+	elif session_key:
+		queryset = queryset.filter(session_key=session_key)
+
+	if exclude_id is not None:
+		queryset = queryset.exclude(id=exclude_id)
+
+	slug = base_slug
+	suffix = 2
+	while queryset.filter(slug=slug).exists():
+		slug = f"{base_slug}-{suffix}"
+		suffix += 1
+
+	return slug
 
 
 def _enforce_object_permissions(request, instance, perms):
@@ -123,8 +147,15 @@ def book_list_create(request):
 	if not serializer.is_valid():
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+	incoming_slug = serializer.validated_data.get("slug")
+	title = serializer.validated_data.get("title", "")
+
 	if request.user and request.user.is_authenticated:
-		instance = serializer.save(user=request.user)
+		resolved_slug = (incoming_slug or "").strip() or _build_unique_book_slug(
+			title,
+			user=request.user,
+		)
+		instance = serializer.save(user=request.user, slug=resolved_slug)
 		return Response(BookSerializer(instance).data, status=status.HTTP_201_CREATED)
 
 	if not can_anon_create(request, "book_creations"):
@@ -133,7 +164,11 @@ def book_list_create(request):
 			status=status.HTTP_403_FORBIDDEN,
 		)
 	profile, created = ensure_anon_profile(request)
-	instance = serializer.save(session_key=str(profile.token))
+	resolved_slug = (incoming_slug or "").strip() or _build_unique_book_slug(
+		title,
+		session_key=str(profile.token),
+	)
+	instance = serializer.save(session_key=str(profile.token), slug=resolved_slug)
 	profile.book_creations += 1
 	profile.save(update_fields=["book_creations", "last_seen_at"])
 	response = Response(BookSerializer(instance).data, status=status.HTTP_201_CREATED)
@@ -185,7 +220,23 @@ def book_detail(request, item_id):
 			partial=request.method == "PATCH",
 		)
 		if serializer.is_valid():
-			serializer.save()
+			incoming_slug = serializer.validated_data.get("slug")
+			title = serializer.validated_data.get("title", instance.title)
+
+			if request.user and request.user.is_authenticated:
+				owner_user = request.user
+				owner_session = None
+			else:
+				owner_user = None
+				owner_session = instance.session_key
+
+			resolved_slug = (incoming_slug or "").strip() or _build_unique_book_slug(
+				title,
+				user=owner_user,
+				session_key=owner_session,
+				exclude_id=instance.id,
+			)
+			serializer.save(slug=resolved_slug)
 			return Response(serializer.data)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -439,16 +490,23 @@ def page_version_list_create(request):
 				},
 				status=status.HTTP_403_FORBIDDEN,
 			)
-		last_version = (
-			PageVersion.objects.filter(page=page)
-			.order_by("-version_number")
+		order_item = (
+			OrderItem.objects.select_related("order")
+			.filter(book=page.book, order__customer=request.user, order__status="paid")
+			.order_by("-order__paid_at", "-order__order_date")
 			.first()
 		)
-		next_version = (last_version.version_number if last_version else 0) + 1
-		instance = serializer.save(version_number=next_version)
+		order = order_item.order if order_item else None
+		page_version = generate_page(
+			request.user,
+			page.book,
+			order,
+			page.page_number,
+			serializer.validated_data.get("prompt"),
+		)
 		return Response(
 			{
-				**PageVersionSerializer(instance).data,
+				**PageVersionSerializer(page_version).data,
 				"pricing_tier": serialize_tier(tier),
 			},
 			status=status.HTTP_201_CREATED,

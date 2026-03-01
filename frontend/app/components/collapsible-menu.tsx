@@ -1,6 +1,10 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
+import type {
+  Dispatch,
+  MouseEvent as ReactMouseEvent,
+  SetStateAction,
+} from "react";
 
 import Link from "next/link";
 
@@ -13,6 +17,27 @@ export default function CollapsibleMenu({
   menuOpen,
   setMenuOpen,
 }: CollapsibleMenuProps) {
+  const onSectionClick = (
+    e: ReactMouseEvent<HTMLAnchorElement>,
+    sectionId: string,
+  ) => {
+    setMenuOpen(false);
+
+    if (window.location.pathname !== "/") {
+      return;
+    }
+
+    e.preventDefault();
+
+    const section = document.getElementById(sectionId);
+    if (!section) {
+      return;
+    }
+
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", `/#${sectionId}`);
+  };
+
   return (
     <div
       className={` md:hidden
@@ -22,11 +47,21 @@ export default function CollapsibleMenu({
     >
       <nav className="header-nav">
         <ul className="space-y-4">
-          <li onClick={() => setMenuOpen(false)}>
-            <a href="#prices-article">ფასები</a>
+          <li>
+            <a
+              href="/#prices-article"
+              onClick={(e) => onSectionClick(e, "prices-article")}
+            >
+              ფასები
+            </a>
           </li>
-          <li onClick={() => setMenuOpen(false)}>
-            <a href="#steps-article">როგორ მუშაობს</a>
+          <li>
+            <a
+              href="/#steps-article"
+              onClick={(e) => onSectionClick(e, "steps-article")}
+            >
+              როგორ მუშაობს
+            </a>
           </li>
           <li onClick={() => setMenuOpen(false)}>
             <Link className="header-action-menu" href="/create">

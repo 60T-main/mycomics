@@ -115,7 +115,7 @@ class Book(models.Model):
 
     # Title
     title = models.CharField(max_length=255)
-    slug = models.SlugField()
+    slug = models.SlugField(null=True, blank=True)
 
     # Style
     art_style = models.CharField(max_length=100)

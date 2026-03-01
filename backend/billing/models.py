@@ -99,7 +99,9 @@ class LedgerEntry(models.Model):
 
     purchase = models.ForeignKey(
         "billing.Purchase",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="ledger_entries"
     )
 
@@ -131,8 +133,6 @@ class LedgerEntry(models.Model):
         null=True,
         blank=True
     )
-
-    retry_consumed = models.BooleanField(default=False)
 
     nano_request_id = models.CharField(
         max_length=255,

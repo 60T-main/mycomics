@@ -1,7 +1,7 @@
 from google import genai
 from PIL import Image
 from google.genai import types
-# 
+
 
 from decimal import Decimal
 from io import BytesIO

@@ -11,10 +11,11 @@ from .models import (
 
 
 class BookSerializer(serializers.ModelSerializer):
+    slug = serializers.SlugField(required=False, allow_blank=True)
+
     class Meta:
         model = Book
-        fields = "__all__"
-        read_only_fields = ["user", "session_key"]
+        exclude = ["user", "session_key"]
 
 
 class CharacterSerializer(serializers.ModelSerializer):

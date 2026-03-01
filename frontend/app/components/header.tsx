@@ -4,6 +4,7 @@ import CollapsibleMenu from "./collapsible-menu";
 import EditPageNav from "./edit-page-nav";
 
 import Link from "next/link";
+import type { MouseEvent as ReactMouseEvent } from "react";
 
 import { useState, useEffect, useRef } from "react";
 
@@ -14,6 +15,25 @@ type HeaderProps = {
 export default function Header({ location }: HeaderProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const onSectionClick = (
+    e: ReactMouseEvent<HTMLAnchorElement>,
+    sectionId: string,
+  ) => {
+    if (window.location.pathname !== "/") {
+      return;
+    }
+
+    e.preventDefault();
+
+    const section = document.getElementById(sectionId);
+    if (!section) {
+      return;
+    }
+
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", `/#${sectionId}`);
+  };
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -37,12 +57,19 @@ export default function Header({ location }: HeaderProps) {
           <Link href="/">
             <img
               className="header-logo"
-              src="logo.png"
+              src="/logo.png"
               alt="website logo 'mycomics.ge'"
             />
           </Link>
 
           <div className="header-links">
+            <Link
+              className="header-prices"
+              href="/#prices-article"
+              onClick={(e) => onSectionClick(e, "prices-article")}
+            >
+              ფასები
+            </Link>
             <Link className="header-action" href="/create">
               შეკვეთა
             </Link>

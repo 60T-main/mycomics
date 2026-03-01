@@ -36,7 +36,6 @@ def ledger_entries(request):
 				"content_type": entry.content_type,
 				"content_id": str(entry.content_id) if entry.content_id else None,
 				"attempt_number": entry.attempt_number,
-				"retry_consumed": entry.retry_consumed,
 				"metadata": entry.metadata,
 				"created_at": entry.created_at,
 			}

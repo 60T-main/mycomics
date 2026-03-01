@@ -5,7 +5,7 @@ from django.db import transaction
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 
-from models import Page, PageVersion
+from ..models import Page, PageVersion
 from billing.models import LedgerEntry
 from .call_nano_banana import call_nano_banana
 
@@ -61,9 +61,6 @@ def generate_page(user, book, order, page_number:int, prompt:dict):
         page_version = PageVersion.objects.select_for_update().get(id=page_version.id)
 
         attempt_number = version_number
-        retry_consumed = attempt_number > 3
-        if retry_consumed:
-            page.is_locked = True
 
         if generation_error:
             page_version.status = "FAILED"
@@ -78,20 +75,23 @@ def generate_page(user, book, order, page_number:int, prompt:dict):
         page_version.generation_cost_usd = generation_cost_usd
         page_version.status = "COMPLETED"
 
+        metadata = {}
+        if order:
+            metadata = {
+                "order_id": order.order_id,
+                "tier_name": order.tier_name,
+                "amount_paid": str(order.total_amount),
+            }
         ledger_entry = LedgerEntry.objects.create(
             user=user,
-            purchase=order,
+            purchase=None,
             book=page.book,
             entry_type="GENERATION",
             content_type="PAGE",
             content_id=page_version.id,
             attempt_number=attempt_number,
-            retry_consumed=retry_consumed,
             nano_request_id=response_id,
-            metadata={
-                "tier_name": order.tier.name,
-                "price": str(order.amount_paid),
-            },
+            metadata=metadata,
         )
 
         page_version.ledger_entry = ledger_entry
