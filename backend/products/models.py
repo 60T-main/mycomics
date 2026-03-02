@@ -49,7 +49,7 @@ class CharacterVersion(models.Model):
     version_number = models.PositiveIntegerField(null=True, blank=True)
 
     # Generated Output
-    generated_image = models.ImageField(upload_to="characters/")
+    generated_image = models.ImageField(upload_to="characters/", null=True, blank=True)
     thumbnail = models.ImageField(null=True, blank=True)
 
     # Prompt Snapshot (JSON)
@@ -203,7 +203,7 @@ class CoverVersion(models.Model):
     title_position = models.JSONField(null=True, blank=True)
 
     # Generated Output
-    generated_image = models.ImageField(upload_to="covers/")
+    generated_image = models.ImageField(upload_to="covers/", null=True, blank=True)
     full_spread_image = models.ImageField(null=True, blank=True, upload_to="covers/")
     thumbnail = models.ImageField(null=True, blank=True)
 
@@ -211,7 +211,7 @@ class CoverVersion(models.Model):
     prompt_snapshot = models.JSONField()
 
     # Generation Parameters
-    aspect_ratio = models.CharField(max_length=20)
+    aspect_ratio = models.CharField(max_length=20, null=True, blank=True)
     seed = models.BigIntegerField(null=True, blank=True)
 
     # Cost & Billing Reference

@@ -22,7 +22,7 @@ class CharacterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Character
         fields = "__all__"
-        read_only_fields = ["created_by_anon_token", "user"]
+        exclude = ["created_by_anon_token", "user"]
 
 
 class CharacterVersionSerializer(serializers.ModelSerializer):
@@ -35,7 +35,7 @@ class CoverVersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CoverVersion
         fields = "__all__"
-        read_only_fields = ["created_by_anon_token", "created_by_user"]
+        exclude = ["created_by_anon_token", "created_by_user"]
 
 
 class PageSerializer(serializers.ModelSerializer):

@@ -4,8 +4,10 @@ import { useErrorStore } from "../../store/useErrorStatesStore"
 import { useLoadingStore } from "../../store/useLoadingStatesStore"
 
 import {useBookStore} from "../../store/books/useBookStatesStore"
+import {useCharacterStore} from "../../store/characters/useCharacterStatesStore"
+import {useCoverStore} from "../../store/covers/useCoverStatesStore"
+import {usePageStore} from "../../store/pages/usePageStatesStore"
 
-import { BookApiFieldsPost, BookApiFieldsPut, BookApiFieldsPatch, BookApiFieldsGet } from "./product-types"
 import { UseBoundStore } from "zustand"
 
 
@@ -15,31 +17,34 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL
 const { setError, clearError } = useErrorStore.getState()
 const { setLoading, clearLoading } = useLoadingStore.getState()
 const { setBookList } = useBookStore.getState()
+const { setCharacterList } = useCharacterStore.getState()
+const { setCoverList } = useCoverStore.getState()
+const { setPageList } = usePageStore.getState()
 
 // fetch Books/Characters/Cover/Pages
 const fetchProducts = async ({ method, id = null, bodyData = null, product }: ProductApiProps) => {
 
-    let errorProduct = "bookApi"
-    let loadingProduct ="bookApi"
-    let endpoint = '';
+    let errorProduct = "bookApi";
+    let loadingProduct = "bookApi";
+    let endpoint = ''; 
     let body: object | null = {};
     let setListProduct: any = setBookList; 
     
     if (product === "characters") {
-        errorProduct = "characterApi"
-        loadingProduct = "characterApi"
-        setListProduct = setCharacterList
+        errorProduct = "characterApi";
+        loadingProduct = "characterApi";
+        setListProduct = setCharacterList;
     } else if (product === "cover") {
-        errorProduct = "coverApi"
-        loadingProduct = "coverApi"
-        setListProduct = setCoverList
+        errorProduct = "coverApi";
+        loadingProduct = "coverApi";
+        setListProduct = setCoverList;
      } else if (product === "pages") {
-        errorProduct = "pagesApi"
-        loadingProduct = "pagesApi"
-        setListProduct = setPageList
+        errorProduct = "pagesApi";
+        loadingProduct = "pagesApi";
+        setListProduct = setPageList;
      }
     
-    clearError(errorProduct)
+    clearError(errorProduct);
     setLoading(loadingProduct, true);
     
 
@@ -65,11 +70,11 @@ const fetchProducts = async ({ method, id = null, bodyData = null, product }: Pr
 
         if (method === "GET") {
             if (data.Response === 'False') {
-                setBookList({} as BookApiFieldsGet);
+                setListProduct({} as any);
                 setError("bookApi", "Server Error, Please Come Back Later...")
                 return;
             }
-            setBookList(data);
+            setListProduct(data);
         }
 
         } catch (error) {
