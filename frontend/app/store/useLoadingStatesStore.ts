@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type ApiLoadingKey = string | "bookApi" | "characterApi" | "characterVersionsApi" | "coverVersionsApi" | "pagesApi" | "pagesVersionsApi" | "retryPackApi";
+export type ApiLoadingKey = "bookApi" | "characterApi" | "characterVersionsApi" | "coverVersionsApi" | "pagesApi" | "pagesVersionsApi" | "retryPackApi" | "initCreateApi";
 
 type LoadingStore = {
   loadings: Record<ApiLoadingKey, boolean>;
@@ -18,6 +18,7 @@ export const useLoadingStore = create<LoadingStore>((set) => ({
     pagesApi: false,
     pagesVersionsApi: false,
     retryPackApi: false,
+    initCreateApi: false,
   },
   setLoading: (key, value) =>
     set((state) => ({
@@ -43,6 +44,7 @@ export const useLoadingStore = create<LoadingStore>((set) => ({
         pagesApi: false,
         pagesVersionsApi: false,
         retryPackApi: false,
+        initCreateApi: false,
       },
     })),
 }));

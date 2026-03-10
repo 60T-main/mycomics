@@ -30,7 +30,9 @@ from .permissions import (
 	PagesPermission,
 	can_anon_create,
 	ensure_anon_profile,
+	find_profile_by_fingerprint,
 	get_anon_profile,
+	get_anon_token,
 	set_anon_cookie,
 )
 from .services.retries import (
@@ -41,8 +43,47 @@ from .services.retries import (
 	serialize_tier,
 )
 from .services.generate_page import generate_page
+from .services.generate_character import generate_character
+from .services.generate_cover import generate_cover
 from orders.models import RetryPackOrder
 from orders.models import OrderItem
+
+
+def _get_related_book(instance):
+	if isinstance(instance, Book):
+		return instance
+	if isinstance(instance, (Character, CoverVersion, Page)):
+		return instance.book
+	if isinstance(instance, CharacterVersion):
+		return instance.character.book
+	if isinstance(instance, PageVersion):
+		return instance.page.book
+	return None
+
+
+def _permission_denied_response(detail="You do not have permission to update this book."):
+	return Response({"detail": detail}, status=status.HTTP_403_FORBIDDEN)
+
+
+def _require_book_access(request, book, *, detail="You do not have permission to update this book."):
+	if request.user and request.user.is_authenticated:
+		if book.user_id != request.user.id:
+			return _permission_denied_response(detail)
+		return None
+
+	profile = get_anon_profile(request)
+	if not profile or book.session_key != str(profile.token):
+		return _permission_denied_response(detail)
+	return None
+
+
+def _require_book_in_draft(book):
+	if book.status != "DRAFT":
+		return Response(
+			{"detail": "Book is locked for edits and generation."},
+			status=status.HTTP_409_CONFLICT,
+		)
+	return None
 
 
 def _build_unique_book_slug(title, *, user=None, session_key=None, exclude_id=None):
@@ -108,6 +149,13 @@ def _detail_view(model_cls, serializer_cls, perms=None):
 		if permission_error:
 			return permission_error
 
+		if request.method in {"PUT", "PATCH", "DELETE"}:
+			related_book = _get_related_book(instance)
+			if related_book is not None:
+				draft_error = _require_book_in_draft(related_book)
+				if draft_error:
+					return draft_error
+
 		if request.method == "GET":
 			serializer = serializer_cls(instance)
 			return Response(serializer.data)
@@ -172,8 +220,55 @@ def book_list_create(request):
 	profile.book_creations += 1
 	profile.save(update_fields=["book_creations", "last_seen_at"])
 	response = Response(BookSerializer(instance).data, status=status.HTTP_201_CREATED)
-	if created:
+	if created or not get_anon_token(request):
 		set_anon_cookie(response, profile.token)
+	return response
+
+
+def _get_latest_owner_draft(request):
+	if request.user and request.user.is_authenticated:
+		return (
+			Book.objects.filter(user=request.user, status="DRAFT")
+			.order_by("-created_at")
+			.first(),
+			None,
+		)
+	profile = get_anon_profile(request)
+	recovered_by_fingerprint = False
+	if not profile:
+		profile = find_profile_by_fingerprint(request)
+		recovered_by_fingerprint = bool(profile)
+	if not profile:
+		return None, None
+	return (
+		Book.objects.filter(session_key=str(profile.token), status="DRAFT")
+		.order_by("-created_at")
+		.first(),
+		profile if recovered_by_fingerprint else None,
+	)
+
+
+def _build_init_create_payload(action, *, book=None):
+	payload = {"action": action}
+	if book is not None:
+		payload["book"] = BookSerializer(book).data
+	return payload
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def book_init_create(request):
+	existing_draft, recovered_profile = _get_latest_owner_draft(request)
+
+	response = None
+	if existing_draft:
+		response = Response(_build_init_create_payload("resume", book=existing_draft))
+	else:
+		response = Response(_build_init_create_payload("needs_style"))
+
+	if recovered_profile and not get_anon_token(request):
+		set_anon_cookie(response, recovered_profile.token)
+
 	return response
 
 
@@ -194,19 +289,13 @@ def _attach_pricing_tier_to_book(data, request):
 @permission_classes([AllowAny])
 def book_detail(request, item_id):
 	instance = get_object_or_404(Book, pk=item_id)
-	if request.user and request.user.is_authenticated:
-		if instance.user_id != request.user.id:
-			return Response(
-				{"detail": "You do not have permission to access this book."},
-				status=status.HTTP_403_FORBIDDEN,
-			)
-	else:
-		profile = get_anon_profile(request)
-		if not profile or instance.session_key != str(profile.token):
-			return Response(
-				{"detail": "You do not have permission to access this book."},
-				status=status.HTTP_403_FORBIDDEN,
-			)
+	access_error = _require_book_access(
+		request,
+		instance,
+		detail="You do not have permission to access this book.",
+	)
+	if access_error:
+		return access_error
 
 	if request.method == "GET":
 		serializer = BookSerializer(instance)
@@ -214,6 +303,10 @@ def book_detail(request, item_id):
 		return Response(data)
 
 	if request.method in {"PUT", "PATCH"}:
+		draft_error = _require_book_in_draft(instance)
+		if draft_error:
+			return draft_error
+
 		serializer = BookSerializer(
 			instance,
 			data=request.data,
@@ -252,31 +345,41 @@ def character_list_create(request):
 		serializer = CharacterSerializer(queryset, many=True)
 		return Response(serializer.data)
 
-	serializer = CharacterSerializer(data=request.data)
+	book_id = request.data.get("book_id")
+	if not book_id:
+		return Response(
+			{"detail": "book_id is required."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	if request.data.get("book") and str(request.data.get("book")) != str(book_id):
+		return Response(
+			{"detail": "book and book_id must match."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	payload = request.data.copy()
+	payload["book"] = book_id
+	serializer = CharacterSerializer(data=payload)
 	if not serializer.is_valid():
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 	book = serializer.validated_data.get("book")
+	access_error = _require_book_access(request, book)
+	if access_error:
+		return access_error
+	draft_error = _require_book_in_draft(book)
+	if draft_error:
+		return draft_error
+
 	if request.user and request.user.is_authenticated:
-		if book.user_id != request.user.id:
-			return Response(
-				{"detail": "You do not have permission to update this book."},
-				status=status.HTTP_403_FORBIDDEN,
-			)
 		instance = serializer.save(user=request.user)
 		return Response(CharacterSerializer(instance).data, status=status.HTTP_201_CREATED)
 
 	profile, created = ensure_anon_profile(request)
-	if book.session_key != str(profile.token):
-		return Response(
-			{"detail": "You do not have permission to update this book."},
-			status=status.HTTP_403_FORBIDDEN,
-		)
 	instance = serializer.save(created_by_anon_token=profile.token)
 	profile.character_creations += 1
 	profile.save(update_fields=["character_creations", "last_seen_at"])
 	response = Response(CharacterSerializer(instance).data, status=status.HTTP_201_CREATED)
-	if created:
+	if created or not get_anon_token(request):
 		set_anon_cookie(response, profile.token)
 	return response
 
@@ -292,17 +395,32 @@ def character_version_list_create(request):
 		serializer = CharacterVersionSerializer(queryset, many=True)
 		return Response(serializer.data)
 
-	serializer = CharacterVersionSerializer(data=request.data)
-	if not serializer.is_valid():
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	character_id = request.data.get("character")
+	if not character_id:
+		return Response(
+			{"detail": "character is required."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	book_id = request.data.get("book_id")
+	if not book_id:
+		return Response(
+			{"detail": "book_id is required."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	character = get_object_or_404(Character, pk=character_id)
+	if str(character.book_id) != str(book_id):
+		return Response(
+			{"detail": "character does not belong to provided book_id."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	access_error = _require_book_access(request, character.book)
+	if access_error:
+		return access_error
+	draft_error = _require_book_in_draft(character.book)
+	if draft_error:
+		return draft_error
 
-	character = serializer.validated_data.get("character")
 	if request.user and request.user.is_authenticated:
-		if character.user_id != request.user.id:
-			return Response(
-				{"detail": "You do not have permission to update this character."},
-				status=status.HTTP_403_FORBIDDEN,
-			)
 		tier = get_tier_for_book(request.user, character.book)
 		base_limit = get_tier_limit_for_book(request.user, character.book)
 		allowed, allowance = consume_retry(
@@ -321,13 +439,29 @@ def character_version_list_create(request):
 				},
 				status=status.HTTP_403_FORBIDDEN,
 			)
-		last_version = (
-			CharacterVersion.objects.filter(character=character)
-			.order_by("-version_number")
+		order_item = (
+			OrderItem.objects.select_related("order")
+			.filter(
+				book=character.book,
+				order__customer=request.user,
+				order__status="paid",
+			)
+			.order_by("-order__paid_at", "-order__order_date")
 			.first()
 		)
-		next_version = (last_version.version_number if last_version else 0) + 1
-		instance = serializer.save(version_number=next_version)
+		order = order_item.order if order_item else None
+		prompt_snapshot = request.data.get("prompt_snapshot", request.data.get("prompt"))
+		seed = request.data.get("seed")
+		if seed == "":
+			seed = None
+		instance = generate_character(
+			request.user,
+			character,
+			order,
+			prompt_snapshot,
+			aspect_ratio=request.data.get("aspect_ratio") or "2:3",
+			seed=seed,
+		)
 		return Response(
 			{
 				**CharacterVersionSerializer(instance).data,
@@ -337,7 +471,7 @@ def character_version_list_create(request):
 		)
 
 	profile = get_anon_profile(request)
-	if not profile or str(character.created_by_anon_token) != str(profile.token):
+	if not profile or character.book.session_key != str(profile.token):
 		return Response(
 			{"detail": "You do not have permission to update this character."},
 			status=status.HTTP_403_FORBIDDEN,
@@ -349,6 +483,9 @@ def character_version_list_create(request):
 		.first()
 	)
 	next_version = (last_version.version_number if last_version else 0) + 1
+	serializer = CharacterVersionSerializer(data=request.data)
+	if not serializer.is_valid():
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 	instance = serializer.save(version_number=next_version)
 	profile.character_generations += 1
 	profile.save(update_fields=["character_generations", "last_seen_at"])
@@ -356,7 +493,7 @@ def character_version_list_create(request):
 		CharacterVersionSerializer(instance).data,
 		status=status.HTTP_201_CREATED,
 	)
-	if created:
+	if created or not get_anon_token(request):
 		set_anon_cookie(response, profile.token)
 	return response
 
@@ -374,17 +511,26 @@ def cover_version_list_create(request):
 		serializer = CoverVersionSerializer(queryset, many=True)
 		return Response(serializer.data)
 
-	serializer = CoverVersionSerializer(data=request.data)
-	if not serializer.is_valid():
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	book_id = request.data.get("book_id")
+	if not book_id:
+		return Response(
+			{"detail": "book_id is required."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	if request.data.get("book") and str(request.data.get("book")) != str(book_id):
+		return Response(
+			{"detail": "book and book_id must match."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	book = get_object_or_404(Book, pk=book_id)
+	access_error = _require_book_access(request, book)
+	if access_error:
+		return access_error
+	draft_error = _require_book_in_draft(book)
+	if draft_error:
+		return draft_error
 
-	book = serializer.validated_data.get("book")
 	if request.user and request.user.is_authenticated:
-		if book.user_id != request.user.id:
-			return Response(
-				{"detail": "You do not have permission to update this book."},
-				status=status.HTTP_403_FORBIDDEN,
-			)
 		tier = get_tier_for_book(request.user, book)
 		base_limit = get_tier_limit_for_book(request.user, book)
 		allowed, allowance = consume_retry(
@@ -403,13 +549,29 @@ def cover_version_list_create(request):
 				},
 				status=status.HTTP_403_FORBIDDEN,
 			)
-		last_version = (
-			CoverVersion.objects.filter(book=book)
-			.order_by("-version_number")
+		order_item = (
+			OrderItem.objects.select_related("order")
+			.filter(book=book, order__customer=request.user, order__status="paid")
+			.order_by("-order__paid_at", "-order__order_date")
 			.first()
 		)
-		next_version = (last_version.version_number if last_version else 0) + 1
-		instance = serializer.save(created_by_user=request.user, version_number=next_version)
+		order = order_item.order if order_item else None
+		prompt_snapshot = request.data.get("prompt_snapshot", request.data.get("prompt"))
+		seed = request.data.get("seed")
+		if seed == "":
+			seed = None
+		instance = generate_cover(
+			request.user,
+			book,
+			order,
+			prompt_snapshot,
+			title_text=request.data.get("title_text") or book.title,
+			subtitle_text=request.data.get("subtitle_text"),
+			author_name=request.data.get("author_name"),
+			title_position=request.data.get("title_position"),
+			aspect_ratio=request.data.get("aspect_ratio") or "2:3",
+			seed=seed,
+		)
 		return Response(
 			{
 				**CoverVersionSerializer(instance).data,
@@ -425,6 +587,11 @@ def cover_version_list_create(request):
 			status=status.HTTP_403_FORBIDDEN,
 		)
 	profile, created = ensure_anon_profile(request)
+	payload = request.data.copy()
+	payload["book"] = book_id
+	serializer = CoverVersionSerializer(data=payload)
+	if not serializer.is_valid():
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 	last_version = (
 		CoverVersion.objects.filter(book=book)
 		.order_by("-version_number")
@@ -441,7 +608,7 @@ def cover_version_list_create(request):
 		CoverVersionSerializer(instance).data,
 		status=status.HTTP_201_CREATED,
 	)
-	if created:
+	if created or not get_anon_token(request):
 		set_anon_cookie(response, profile.token)
 	return response
 
@@ -449,7 +616,43 @@ def cover_version_list_create(request):
 cover_version_detail = _detail_view(CoverVersion, CoverVersionSerializer, [CoverVersionPermission])
 
 
-page_list_create = _list_create_view(Page, PageSerializer, [PagesPermission])
+
+@api_view(["GET", "POST"])
+@permission_classes([PagesPermission])
+def page_list_create(request):
+	if request.method == "GET":
+		queryset = Page.objects.filter(book__user=request.user)
+		serializer = PageSerializer(queryset, many=True)
+		return Response(serializer.data)
+
+	book_id = request.data.get("book_id")
+	if not book_id:
+		return Response(
+			{"detail": "book_id is required."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	if request.data.get("book") and str(request.data.get("book")) != str(book_id):
+		return Response(
+			{"detail": "book and book_id must match."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	book = get_object_or_404(Book, pk=book_id)
+	access_error = _require_book_access(request, book)
+	if access_error:
+		return access_error
+	draft_error = _require_book_in_draft(book)
+	if draft_error:
+		return draft_error
+
+	payload = request.data.copy()
+	payload["book"] = book_id
+	serializer = PageSerializer(data=payload)
+	if not serializer.is_valid():
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	instance = serializer.save()
+	return Response(PageSerializer(instance).data, status=status.HTTP_201_CREATED)
+
+
 page_detail = _detail_view(Page, PageSerializer, [PagesPermission])
 
 
@@ -461,17 +664,31 @@ def page_version_list_create(request):
 		serializer = PageVersionSerializer(queryset, many=True)
 		return Response(serializer.data)
 
+	book_id = request.data.get("book_id")
+	if not book_id:
+		return Response(
+			{"detail": "book_id is required."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+
 	serializer = PageVersionSerializer(data=request.data)
 	if not serializer.is_valid():
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 	page = serializer.validated_data.get("page")
+	if str(page.book_id) != str(book_id):
+		return Response(
+			{"detail": "page does not belong to provided book_id."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+	access_error = _require_book_access(request, page.book)
+	if access_error:
+		return access_error
+	draft_error = _require_book_in_draft(page.book)
+	if draft_error:
+		return draft_error
+
 	if request.user and request.user.is_authenticated:
-		if page.book.user_id != request.user.id:
-			return Response(
-				{"detail": "You do not have permission to update this book."},
-				status=status.HTTP_403_FORBIDDEN,
-			)
 		tier = get_tier_for_book(request.user, page.book)
 		base_limit = get_tier_limit_for_book(request.user, page.book)
 		allowed, allowance = consume_retry(

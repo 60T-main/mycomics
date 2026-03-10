@@ -94,6 +94,9 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
 ]
 
+# Keep anonymous token stable across browser restarts for 1 year by default.
+ANON_COOKIE_MAX_AGE = int(os.getenv("ANON_COOKIE_MAX_AGE", str(60 * 60 * 24 * 365)))
+
 ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [

@@ -13,6 +13,15 @@ from .models import (
 class BookSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(required=False, allow_blank=True)
 
+    def validate(self, attrs):
+        instance = getattr(self, "instance", None)
+        if instance is not None and "art_style" in attrs:
+            if attrs["art_style"] != instance.art_style:
+                raise serializers.ValidationError(
+                    {"art_style": "Book style cannot be changed after creation."}
+                )
+        return attrs
+
     class Meta:
         model = Book
         exclude = ["user", "session_key"]

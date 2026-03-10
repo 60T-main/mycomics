@@ -76,6 +76,9 @@ li, .li{
   @apply text-base md:text-lg;
 }
 
+button, .button {
+  @apply cursor-pointer;
+}
 
 @layer utilities {
 
@@ -487,7 +490,7 @@ li, .li{
     }
 
     .cover-templates{
-      @apply grid grid-cols-2 gap-8 py-4 md:pt-12 lg:gap-10;
+      @apply grid grid-cols-2 place-items-center gap-8 py-4 md:pt-12 lg:gap-10;
     }
 
     
@@ -529,7 +532,7 @@ li, .li{
     }
     
     .hint-div {
-      @apply flex items-center justify-center w-70 text-neutral-900 mt-4 w-80;
+      @apply flex items-center justify-center w-70 text-neutral-900 mt-4 md:w-full;
     }
     
     .character-upload-content, .cover-create-content,.cover-div, .characters-content{
@@ -542,6 +545,10 @@ li, .li{
 
     .character-article, .character-preview, .cover-article {
       @apply w-9/10 md:w-8/10 xl:w-4/10 flex flex-col  border-2 rounded-3xl shadow-[var(--shadow)];
+    }
+    
+    .cover-article.book{
+      @apply lg:w-6/10 xl:w-1/2 mb-12;
     }
     
     .character-article h2, .character-preview h2, .cover-article h2,
@@ -590,6 +597,9 @@ li, .li{
     
     .edit-section{
       @apply flex flex-col items-center justify-center gap-10 md:gap-20 lg:flex-row-reverse lg:items-start lg:mx-12;
+    }
+    .edit-section.book{
+      @apply gap-0 lg:!flex-row lg:items-start lg:mx-0;
     }
     
     .characters-div{

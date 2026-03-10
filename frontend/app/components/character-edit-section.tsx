@@ -1,38 +1,116 @@
 "use client";
 
-import Modal from "./modal";
-import { useSelectModalStore } from "../store/useModalStateStore";
-
 import ImageUpload from "./image-upload";
 
-import { useState, useEffect, useRef } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
-import { useSelectOptionsModalStore } from "../store/useOptionsModalStateStore";
-import {
-  useDropdownOutsideClick,
-  useDropdownTriggerStore,
-} from "../store/useDropdownTriggerStore";
-
-import { useScreenSizeStore } from "@/app/store/useScreenSizeStore";
-
-import OptionsModal from "./options-modal";
+type CharacterItem = {
+  id: string;
+  name: string;
+  gender: string;
+  reference_photo: string | null;
+  isAdded: boolean;
+};
 
 export default function CharacterEditSection() {
-  const { isLgUp } = useScreenSizeStore();
-
   const [uploaded, setUploaded] = useState(false);
-
-  const { open, setOpen } = useSelectModalStore();
-
-  const { openCardId } = useSelectOptionsModalStore();
-  const { DropdownTrigger } = useDropdownTriggerStore();
-  const { cardRefs } = useDropdownOutsideClick();
 
   useEffect(() => {
     uploaded && setErrorMessage(null);
   }, [uploaded]);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [characters, setCharacters] = useState<CharacterItem[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [isCharactersOpen, setIsCharactersOpen] = useState(false);
+  const charactersDetailsRef = useRef<HTMLDetailsElement | null>(null);
+  const hasInitializedCharactersRef = useRef(false);
+  const previousCharactersCountRef = useRef(0);
+
+  useEffect(() => {
+    if (!hasInitializedCharactersRef.current) {
+      previousCharactersCountRef.current = characters.length;
+      hasInitializedCharactersRef.current = true;
+      return;
+    }
+
+    if (characters.length > previousCharactersCountRef.current) {
+      setIsCharactersOpen(true);
+      requestAnimationFrame(() => {
+        charactersDetailsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    }
+
+    previousCharactersCountRef.current = characters.length;
+  }, [characters.length]);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!uploaded) {
+      setErrorMessage("ჯერ ატვირთე ფოტო");
+      return;
+    }
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const nextName = String(formData.get("characterName") ?? "").trim();
+    const nextGender = String(formData.get("characterGender") ?? "").trim();
+
+    if (!nextName || !nextGender) {
+      setErrorMessage("შეავსე ყველა აუცილებელი ველი");
+      return;
+    }
+
+    setCharacters((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        name: nextName,
+        gender: nextGender,
+        reference_photo: null,
+        isAdded: true,
+      },
+    ]);
+
+    form.reset();
+    setErrorMessage(null);
+  };
+
+  const startEditName = (character: CharacterItem) => {
+    setEditingId(character.id);
+    setEditingName(character.name);
+  };
+
+  const cancelEditName = () => {
+    setEditingId(null);
+    setEditingName("");
+  };
+
+  const saveEditName = async (character: CharacterItem) => {
+    const nextName = editingName.trim();
+    if (!nextName) {
+      return;
+    }
+
+    setCharacters((prev) =>
+      prev.map((item) =>
+        item.id === character.id ? { ...item, name: nextName } : item,
+      ),
+    );
+    cancelEditName();
+  };
+
+  const deleteCharacter = (characterId: string) => {
+    setCharacters((prev) => prev.filter((item) => item.id !== characterId));
+    if (editingId === characterId) {
+      cancelEditName();
+    }
+  };
 
   return (
     <section
@@ -41,143 +119,181 @@ export default function CharacterEditSection() {
       aria-labelledby="tab-characters-btn"
       className="edit-section"
     >
-      {open && !isLgUp && (
-        <Modal onClose={() => setOpen(false)}>
-          <button onClick={() => setOpen(false)}>X</button>
-          <img src="/supergirl-drawing.png" />
-        </Modal>
-      )}
-      <article className="character-preview">
-        <h2>ჩემი პერსონაჟები</h2>
-        <div className="characters-content">
-          <div className="characters-screen">
-            {isLgUp && <img src="/supergirl-drawing.png" />}
-          </div>
-          <div className="characters-div">
-            <div
-              className="img-container character"
-              key={"1"}
-              ref={(el) => {
-                if (el) cardRefs.current["1"] = el;
-              }}
-            >
-              <img onClick={() => setOpen(true)} src="/supergirl.png" alt="" />
-              <p>ანა</p>
-              <i
-                className="bi bi-three-dots"
-                onClick={() => {
-                  DropdownTrigger("1");
-                }}
-              ></i>
-              <div className={`${openCardId != "1" ? "hidden" : ""}`}>
-                <OptionsModal></OptionsModal>
-              </div>
-            </div>
-            <div
-              className="img-container character"
-              key={"2"}
-              ref={(el) => {
-                if (el) cardRefs.current["2"] = el;
-              }}
-            >
-              <img onClick={() => setOpen(true)} src="/superman.png" alt="" />
-              <p>ნიკა</p>
-              <i
-                className="bi bi-three-dots"
-                onClick={() => {
-                  DropdownTrigger("2");
-                }}
-              ></i>
-              <div className={`${openCardId != "2" ? "hidden" : ""}`}>
-                <OptionsModal></OptionsModal>
-              </div>
-            </div>
-            <div
-              className="img-container character"
-              key={"3"}
-              ref={(el) => {
-                if (el) cardRefs.current["3"] = el;
-              }}
-            >
-              <img
-                onClick={() => setOpen(true)}
-                src="/supergirl-drawing.png"
-                alt=""
-              />
-              <p>ბცმცი</p>
-              <i
-                className="bi bi-three-dots"
-                onClick={() => {
-                  DropdownTrigger("3");
-                }}
-              ></i>
-              <div className={`${openCardId != "3" ? "hidden" : ""}`}>
-                <OptionsModal></OptionsModal>
-              </div>
-            </div>
-          </div>
-        </div>
-      </article>
-      <article className="character-article">
-        <h2>პერსონაჟის დამატება</h2>
-        <div className="character-upload-content">
-          <ImageUpload setUploaded={setUploaded}></ImageUpload>
-          <div className="hint-div">
-            <p>
-              <b>*რჩევა:</b> <br />
-              საუკეთესო შედეგისთვის გამოიყენე ფოტო, სადაც სახე მკაფიოდ ჩანს.
+      <article className="character-article lg:w-7/10 xl:w-6/10 mb-12">
+        <h2>ნაბიჯი 2/4 • პერსონაჟის დამატება</h2>
+
+        <div className="w-full flex flex-col items-center justify-center gap-6 lg:gap-10 px-6 py-6 lg:py-8">
+          <div className="w-full max-w-3xl rounded-2xl border-2 border-neutral-200 bg-orange-50/40 px-4 py-3">
+            <p className="font-bold">
+              ატვირთე პერსონაჟის ფოტო და შეავსე მარტივი ინფორმაცია.
             </p>
           </div>
-          <form className="w-full max-w-md flex flex-col gap-4 mt-6 px-6 pb-6">
-            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-            <div className="relative">
-              {!uploaded && (
-                <button
-                  type="button"
-                  className="absolute inset-0 z-10 cursor-not-allowed bg-transparent"
-                  onClick={() => {
-                    setErrorMessage("ჯერ ატვირთე ფოტო");
-                  }}
-                  aria-label="Upload required"
-                />
-              )}
-              <fieldset
-                disabled={!uploaded}
-                className="flex flex-col gap-4 disabled:opacity-50"
-              >
-                <label className="flex flex-col gap-2">
-                  <span>პერსონაჟის სახელი</span>
-                  <input
-                    type="text"
-                    name="characterName"
-                    className="border-2 rounded-xl px-3 py-2"
-                    placeholder="შეიყვანე სახელი"
-                    required
-                  />
-                </label>
 
-                <label className="flex flex-col gap-2">
-                  <span>სქესი</span>
-                  <select
-                    name="characterClothes"
-                    className="border-2 rounded-xl px-3 py-2"
-                    defaultValue=""
-                    required
-                  >
-                    <option value="" disabled>
-                      აირჩიე სქესი
-                    </option>
-                    <option value="casual">მდედრობითი</option>
-                    <option value="formal">მამრობითი</option>
-                  </select>
-                </label>
-
-                <button type="submit" className="border-2 rounded-2xl py-2">
-                  დამატება
-                </button>
-              </fieldset>
+          <div className="w-full flex flex-col items-center">
+            <div className="w-full max-w-3xl mb-2 md:mb-6 text-left">
+              <p className="font-bold">1) ატვირთე ფოტო</p>
+              <p className="text-neutral-700 text-xs md:text-sm">
+                ატვირთე 1-3 ფოტო, სადაც სახე მკაფიოდ ჩანს.
+              </p>
             </div>
+            <ImageUpload setUploaded={setUploaded}></ImageUpload>
+
+            <div className="w-full max-w-3xl mt-2 min-h-6">
+              {uploaded ? (
+                <p className="text-xs md:text-sm text-green-700">
+                  ფოტო მზადაა. ახლა შეავსე ინფორმაცია ქვემოთ.
+                </p>
+              ) : (
+                <p className="text-xs md:text-sm text-neutral-500">
+                  ჯერ ფოტო არ აგიტვირთავს.
+                </p>
+              )}
+            </div>
+
+            <div className="hint-div">
+              <p>
+                <b>*რჩევა:</b> <br />
+                საუკეთესო შედეგისთვის გამოიყენე ფოტო, სადაც სახე მკაფიოდ ჩანს.
+              </p>
+            </div>
+          </div>
+
+          <form
+            onSubmit={handleSubmit}
+            className="w-full max-w-3xl flex flex-col gap-4"
+          >
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+
+            <fieldset
+              disabled={!uploaded}
+              className="w-full flex flex-col gap-4 disabled:opacity-50"
+            >
+              <label className="flex flex-col gap-2">
+                <span>2) პერსონაჟის სახელი</span>
+                <input
+                  type="text"
+                  name="characterName"
+                  className="border-2 rounded-xl px-3 py-2"
+                  placeholder="მაგ: ანა"
+                  required
+                />
+              </label>
+
+              <label className="flex flex-col gap-2">
+                <span>3) სქესი</span>
+                <select
+                  name="characterGender"
+                  className="border-2 rounded-xl px-3 py-2"
+                  defaultValue=""
+                  required
+                >
+                  <option value="" disabled>
+                    აირჩიე სქესი
+                  </option>
+                  <option value="casual">მდედრობითი</option>
+                  <option value="formal">მამრობითი</option>
+                </select>
+              </label>
+
+              <button type="submit" className="border-2 rounded-2xl py-2 mt-2">
+                დამატება და გაგრძელება
+              </button>
+            </fieldset>
           </form>
+
+          <details
+            ref={charactersDetailsRef}
+            open={isCharactersOpen}
+            onToggle={(event) => {
+              setIsCharactersOpen(event.currentTarget.open);
+            }}
+            className="w-full max-w-3xl rounded-2xl border-2 border-neutral-200 bg-white px-4 py-3"
+          >
+            <summary className="cursor-pointer select-none font-bold">
+              ჩემი პერსონაჟები ({characters.length})
+            </summary>
+            <p className="text-neutral-700 text-xs md:text-sm mt-1 mb-3">
+              აქ შეგიძლია სახელის შეცვლა ან წაშლა.
+            </p>
+
+            {characters.length === 0 && (
+              <p className="text-xs md:text-sm text-neutral-500">
+                ჯერ პერსონაჟი არ გაქვს დამატებული.
+              </p>
+            )}
+
+            {characters.length > 0 && (
+              <div className="mt-2 flex flex-col gap-3">
+                {characters.map((character) => (
+                  <div
+                    key={character.id}
+                    className="flex items-center gap-3 rounded-xl border-2 border-neutral-200 p-3"
+                  >
+                    <img
+                      src={character.reference_photo || "/supergirl.png"}
+                      alt={character.name}
+                      className="h-14 w-14 rounded-lg object-cover border-2"
+                    />
+
+                    <div className="flex-1 min-w-0">
+                      {editingId === character.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            value={editingName}
+                            onChange={(event) =>
+                              setEditingName(event.target.value)
+                            }
+                            className="border-2 rounded-lg px-2 py-1 w-full"
+                            maxLength={80}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => saveEditName(character)}
+                            className="border-2 rounded-lg px-2 py-1"
+                          >
+                            შენახვა
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEditName}
+                            className="border-2 rounded-lg px-2 py-1"
+                          >
+                            გაუქმება
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold truncate">{character.name}</p>
+                          <span className="text-[10px] md:text-xs px-2 py-0.5 border rounded-full text-neutral-700">
+                            {character.isAdded ? "დამატებულია" : "დრაფტი"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {editingId !== character.id && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => startEditName(character)}
+                          className="border-2 rounded-lg px-2 py-1 text-xs md:text-sm"
+                        >
+                          სახელის შეცვლა
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteCharacter(character.id)}
+                          className="border-2 rounded-lg px-2 py-1 text-xs md:text-sm text-red-600"
+                        >
+                          წაშლა
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </details>
         </div>
       </article>
     </section>

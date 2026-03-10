@@ -3,12 +3,13 @@ import { ProductApiProps } from "./product-types"
 import { useErrorStore } from "../../store/useErrorStatesStore"
 import { useLoadingStore } from "../../store/useLoadingStatesStore"
 
+import {ApiLoadingKey} from "../../store/useLoadingStatesStore"
+import {ApiErrorKey} from "../../store/useErrorStatesStore"
+
 import {useBookStore} from "../../store/books/useBookStatesStore"
 import {useCharacterStore} from "../../store/characters/useCharacterStatesStore"
 import {useCoverStore} from "../../store/covers/useCoverStatesStore"
 import {usePageStore} from "../../store/pages/usePageStatesStore"
-
-import { UseBoundStore } from "zustand"
 
 
 
@@ -24,10 +25,10 @@ const { setPageList } = usePageStore.getState()
 // fetch Books/Characters/Cover/Pages
 const fetchProducts = async ({ method, id = null, bodyData = null, product }: ProductApiProps) => {
 
-    let errorProduct = "bookApi";
-    let loadingProduct = "bookApi";
+    let errorProduct = "bookApi" as ApiErrorKey;
+    let loadingProduct = "bookApi" as ApiLoadingKey;
     let endpoint = ''; 
-    let body: object | null = {};
+    let body: object | null = null;
     let setListProduct: any = setBookList; 
     
     if (product === "characters") {
@@ -35,8 +36,8 @@ const fetchProducts = async ({ method, id = null, bodyData = null, product }: Pr
         loadingProduct = "characterApi";
         setListProduct = setCharacterList;
     } else if (product === "cover") {
-        errorProduct = "coverApi";
-        loadingProduct = "coverApi";
+        errorProduct = "coverVersionsApi";
+        loadingProduct = "coverVersionsApi";
         setListProduct = setCoverList;
      } else if (product === "pages") {
         errorProduct = "pagesApi";
@@ -49,20 +50,25 @@ const fetchProducts = async ({ method, id = null, bodyData = null, product }: Pr
     
 
     if (id) {
-        endpoint = "/" + id;
+        endpoint = id + "/";
     }
 
-    if (method === "POST" || method === "PUT" || method === "PATCH" && bodyData) {
+    if ((method === "POST" || method === "PUT" || method === "PATCH") && bodyData) {
         body = bodyData
     }
     
     try {
-        const response = await fetch(API_BASE + "/books" + endpoint, {
+        const requestInit: RequestInit = {
                 method: method.toUpperCase(),
                 credentials: 'include',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: JSON.stringify(body), 
-        });
+                headers: { 'Content-Type': 'application/json' },
+        };
+
+        if (body !== null) {
+            requestInit.body = JSON.stringify(body);
+        }
+
+        const response = await fetch(API_BASE + "/product/books/" + endpoint, requestInit);
 
         if (!response.ok) throw new Error('Failed to fetch books');
 
@@ -71,16 +77,19 @@ const fetchProducts = async ({ method, id = null, bodyData = null, product }: Pr
         if (method === "GET") {
             if (data.Response === 'False') {
                 setListProduct({} as any);
-                setError("bookApi", "Server Error, Please Come Back Later...")
-                return;
+                setError(errorProduct, "Server Error, Please Come Back Later...")
+                return null;
             }
             setListProduct(data);
         }
 
+        return data;
+
         } catch (error) {
-            setError("bookApi", "Server Error, Please Come Back Later...")
+            setError(errorProduct, "Server Error, Please Come Back Later...")
+            return null;
         } finally {
-            clearLoading("bookApi");
+            clearLoading(loadingProduct);
         }
 }
 

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type ApiErrorKey = string | "bookApi" | "characterApi" | "characterVersionsApi" | "coverVersionsApi" | "pagesApi" | "pagesVersionsApi" | "retryPackApi";
+export type ApiErrorKey =  "bookApi" | "characterApi" | "characterVersionsApi" | "coverVersionsApi" | "pagesApi" | "pagesVersionsApi" | "retryPackApi" | "initCreateApi";
 
 type ErrorStore = {
   errors: Record<ApiErrorKey, string | null>;
@@ -18,6 +18,7 @@ export const useErrorStore = create<ErrorStore>((set) => ({
     pagesApi: null,
     pagesVersionsApi: null,
     retryPackApi: null,
+    initCreateApi: null,
   },
   setError: (key, value) =>
     set((state) => ({
@@ -43,6 +44,7 @@ export const useErrorStore = create<ErrorStore>((set) => ({
         pagesApi: null,
         pagesVersionsApi: null,
         retryPackApi: null,
+        initCreateApi: null,
       },
     })),
 }));

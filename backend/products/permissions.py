@@ -9,6 +9,7 @@ from .models import AnonymousProfile
 
 ANON_COOKIE_NAME = "anon_token"
 ANON_HEADER_META_KEY = "HTTP_X_ANONYMOUS_TOKEN"
+ANON_COOKIE_MAX_AGE = int(getattr(settings, "ANON_COOKIE_MAX_AGE", 60 * 60 * 24 * 365))
 
 
 def _hash_value(value: str) -> str:
@@ -39,6 +40,16 @@ def _profile_matches_request(profile: AnonymousProfile, request) -> bool:
 	return profile.ip_hash == ip_hash and profile.ua_hash == ua_hash
 
 
+def _profile_matches_user_agent(profile: AnonymousProfile, request) -> bool:
+	ua_hash = _hash_value(get_user_agent(request))
+	return profile.ua_hash == ua_hash
+
+
+def _profile_matches_ip(profile: AnonymousProfile, request) -> bool:
+	ip_hash = _hash_value(get_client_ip(request))
+	return profile.ip_hash == ip_hash
+
+
 def get_anon_profile(request) -> AnonymousProfile | None:
 	token = get_anon_token(request)
 	if not token:
@@ -47,8 +58,12 @@ def get_anon_profile(request) -> AnonymousProfile | None:
 		profile = AnonymousProfile.objects.get(token=token)
 	except AnonymousProfile.DoesNotExist:
 		return None
-	if not _profile_matches_request(profile, request):
+	if not _profile_matches_user_agent(profile, request):
 		return None
+	if not _profile_matches_ip(profile, request):
+		profile.ip_hash = _hash_value(get_client_ip(request))
+		profile.last_seen_at = timezone.now()
+		profile.save(update_fields=["ip_hash", "last_seen_at"])
 	return profile
 
 
@@ -92,6 +107,7 @@ def set_anon_cookie(response, token: uuid.UUID) -> None:
 	response.set_cookie(
 		ANON_COOKIE_NAME,
 		str(token),
+		max_age=ANON_COOKIE_MAX_AGE,
 		httponly=True,
 		samesite="Lax",
 	)
@@ -100,6 +116,15 @@ def set_anon_cookie(response, token: uuid.UUID) -> None:
 class PagesPermission(BasePermission):
 	def has_permission(self, request, view) -> bool:
 		return bool(request.user and request.user.is_authenticated)
+
+	def has_object_permission(self, request, view, obj) -> bool:
+		if not request.user or not request.user.is_authenticated:
+			return False
+		if hasattr(obj, "book"):
+			return obj.book.user_id == request.user.id
+		if hasattr(obj, "page") and hasattr(obj.page, "book"):
+			return obj.page.book.user_id == request.user.id
+		return False
 
 
 class CharacterPermission(BasePermission):
@@ -118,10 +143,10 @@ class CharacterPermission(BasePermission):
 		if request.method in SAFE_METHODS:
 			return True
 		if request.user and request.user.is_authenticated:
-			return True
+			return obj.book.user_id == request.user.id
 		if request.method == "DELETE":
 			profile = get_anon_profile(request)
-			return profile and str(obj.created_by_anon_token) == str(profile.token)
+			return profile and obj.book.session_key == str(profile.token)
 		return False
 
 
@@ -141,12 +166,10 @@ class CharacterVersionPermission(BasePermission):
 		if request.method in SAFE_METHODS:
 			return True
 		if request.user and request.user.is_authenticated:
-			return True
+			return obj.character.book.user_id == request.user.id
 		if request.method == "DELETE":
 			profile = get_anon_profile(request)
-			return profile and str(obj.character.created_by_anon_token) == str(
-				profile.token
-			)
+			return profile and obj.character.book.session_key == str(profile.token)
 		return False
 
 
@@ -166,8 +189,8 @@ class CoverVersionPermission(BasePermission):
 		if request.method in SAFE_METHODS:
 			return True
 		if request.user and request.user.is_authenticated:
-			return True
+			return obj.book.user_id == request.user.id
 		if request.method == "DELETE":
 			profile = get_anon_profile(request)
-			return profile and str(obj.created_by_anon_token) == str(profile.token)
+			return profile and obj.book.session_key == str(profile.token)
 		return False

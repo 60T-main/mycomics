@@ -73,6 +73,11 @@ Write-body conventions
 Books
 
 - GET /books/
+- GET /books/init-create/
+  - Purpose: one-call decision for entering create flow.
+  - Response shape:
+    - { action: "resume", book: <Book object> } when user already has a DRAFT.
+    - { action: "needs_style" } when no DRAFT exists.
 - POST /books/
   - Client should send:
     - Required: title (string), art_style (string)
@@ -192,6 +197,33 @@ Retry Pack Apply
 
 ---
 
+## Frontend quick guide: init-create
+
+Use this on /create entry so frontend does not guess state.
+
+1. On page load, call GET /api/product/books/init-create/
+
+- If action === "resume": route to existing draft editor using returned book.id.
+- If action === "needs_style": show style picker UI.
+
+2. After user picks style, call POST /api/product/books/
+
+- New draft payload example:
+  - { "title": "My Story", "art_style": "anime" }
+
+3. Handle response
+
+- On successful /books/ create -> use returned book.id and open editor flow.
+
+Minimal response examples
+
+- Resume:
+  - { "action": "resume", "book": { "id": "<uuid>", "title": "...", "art_style": "...", "status": "DRAFT", ... } }
+- Needs style:
+  - { "action": "needs_style" }
+
+---
+
 ## Orders API
 
 Base: /api/orders/
@@ -259,6 +291,150 @@ How to check a book's tier and retries
 - 401: Authentication required (pages, retry pack apply, ledger)
 - 403: Ownership or retry limit violations
 - 400: Validation errors
+
+---
+
+## Frontend Response Handling (all endpoints)
+
+Use this baseline for every request first:
+
+- Any 2xx: success path (continue flow, update local state from response JSON)
+- 400: input/validation issue (show inline form errors, do not retry automatically)
+- 401: auth/session missing (redirect to login or refresh session)
+- 403: permission/ownership/rule violation (show non-blocking message, disable blocked action)
+- 404: item not found/deleted (refresh list and route away from stale detail page)
+- 409: state conflict (usually non-DRAFT lock; show "book locked" and disable edit/generate)
+- 5xx: server issue (show toast, allow manual retry)
+
+### /api/product/books/init-create/ (GET)
+
+- 200 + `{ action: "resume", book }`
+  - Meaning: user already has a DRAFT book.
+  - Frontend action: load `book.id` into editor flow and skip style picker.
+- 200 + `{ action: "needs_style" }`
+  - Meaning: no DRAFT exists for current identity.
+  - Frontend action: show style selection UI; on confirm call `POST /api/product/books/`.
+
+### Customers endpoints
+
+- `POST /api/customer/register/`
+  - Success: account created and session established.
+  - Do: route to app/home and hydrate current user state.
+- `POST /api/customer/login/`
+  - Success: session established.
+  - Do: route to intended page and re-fetch protected data.
+- `POST /api/customer/logout/`
+  - Success: session cleared.
+  - Do: clear user-dependent stores and route to public page.
+- `GET /api/customer/status/`
+  - Success: returns `loggedIn` flag.
+  - Do: gate protected routes and render auth-specific UI.
+- `GET /api/customer/user/`
+  - Success: current profile object.
+  - Do: populate profile/account UI.
+- `PUT /api/customer/edit/`
+  - Success: profile updated.
+  - Do: replace local profile cache with response.
+- `GET|POST|PUT /api/customer/address/`
+  - GET success: list/current address payload.
+  - POST success: address created.
+  - PUT success: address updated.
+  - Do: refresh checkout address state after POST/PUT.
+
+### Products endpoints
+
+- `GET /api/product/books/`
+  - Success: books list for current owner scope.
+  - Do: use for dashboard/list rendering.
+- `POST /api/product/books/`
+  - Success (typically 201): new book created.
+  - Do: route to `/create` editor with returned `book.id`.
+- `GET /api/product/books/<id>/`
+  - Success: single book details.
+  - Do: hydrate editor/book settings state.
+- `PUT|PATCH /api/product/books/<id>/`
+  - Success: updated book.
+  - Do: replace local book state.
+  - Conflict handling: if 409, treat as locked/non-editable state.
+- `DELETE /api/product/books/<id>/`
+  - Success: removed.
+  - Do: navigate back to books list.
+
+- `GET /api/product/characters/`
+  - Success: character list.
+  - Do: render character assets for selected book.
+- `POST /api/product/characters/`
+  - Success: character created.
+  - Do: append/select created character.
+- `GET|PUT|PATCH|DELETE /api/product/characters/<id>/`
+  - GET: hydrate character detail.
+  - PUT/PATCH: update character in state.
+  - DELETE: remove from local list and selection.
+
+- `GET /api/product/character-versions/`
+  - Success: version history list.
+  - Do: render retries/history timeline.
+- `POST /api/product/character-versions/`
+  - Success: generation version created.
+  - Do: set as active character output.
+  - 403 with retry-limit payload: show upsell/retry-pack UI using `max_retries`, `used_retries`.
+- `GET|PUT|PATCH|DELETE /api/product/character-versions/<id>/`
+  - Use same CRUD handling pattern as above.
+
+- `GET /api/product/cover-versions/`
+  - Success: cover version history.
+  - Do: render cover history picker.
+- `POST /api/product/cover-versions/`
+  - Success: generated cover version.
+  - Do: set active cover preview.
+  - 403 retry-limit: show retry-pack/upgrade CTA.
+- `GET|PUT|PATCH|DELETE /api/product/cover-versions/<id>/`
+  - Use same CRUD handling pattern as above.
+
+- `GET /api/product/pages/`
+  - Success: page list.
+  - Do: render page navigator.
+- `POST /api/product/pages/`
+  - Success: page created.
+  - Do: append page and jump to it.
+- `GET|PUT|PATCH|DELETE /api/product/pages/<id>/`
+  - Use same CRUD handling pattern as above.
+
+- `GET /api/product/page-versions/`
+  - Success: page version history.
+  - Do: render generation history per page.
+- `POST /api/product/page-versions/`
+  - Success: generated page version.
+  - Do: set latest image/version as active.
+  - 403 retry-limit: show retry-pack/upgrade CTA.
+- `GET|PUT|PATCH|DELETE /api/product/page-versions/<id>/`
+  - Use same CRUD handling pattern as above.
+
+- `POST /api/product/retries/add/`
+  - Success: allowance increased for item.
+  - Do: refresh retry counters and re-enable generation CTA.
+  - 400/403: keep generation disabled and show server detail.
+
+### Orders endpoints
+
+- `POST /api/orders/create/`
+  - Success: order created (pending payment flow).
+  - Do: move user into payment step with returned order identifiers.
+- `POST /api/orders/payment/webhook/`
+  - Success: payment status recorded.
+  - Do (frontend if called directly in non-prod): refresh orders/books ownership state.
+- `POST /api/orders/retry-pack/create/`
+  - Success: retry-pack order created.
+  - Do: continue payment for retry pack using returned IDs.
+
+### Billing endpoints
+
+- `GET /api/billing/tiers/`
+  - Success: available pricing tiers.
+  - Do: render plan cards/prices.
+- `GET /api/billing/ledger/`
+  - Success: user ledger entries.
+  - Do: render billing history table.
 
 ---
 

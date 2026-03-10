@@ -21,10 +21,19 @@ def generate_page(user, book, order, page_number:int, prompt:dict):
             .get_or_create(
                 book=book,
                 page_number=page_number,
-                scene_description=prompt_text,
-                text_content=prompt_text,
+                defaults={
+                    "scene_description": prompt_text,
+                    "text_content": prompt_text,
+                },
             )
         )
+
+        if not created and (
+            page.scene_description != prompt_text or page.text_content != prompt_text
+        ):
+            page.scene_description = prompt_text
+            page.text_content = prompt_text
+            page.save(update_fields=["scene_description", "text_content"])
 
         if page.book.user != user:
             raise PermissionDenied()

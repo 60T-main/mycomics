@@ -1,3 +1,4 @@
+// API Props used in fetchProducts function //
 export type ProductApiProps = {
     method: 'GET' | "POST" | "PUT" | "PATCH" | "DELETE";
     id: null | string;
@@ -10,6 +11,10 @@ export type CharacterApiProps = Omit<ProductApiProps, 'bodyData'> & { bodyData: 
 export type CoverApiProps = Omit<ProductApiProps, 'bodyData'> & { bodyData: CharacterVersionApiFieldsPost | CharacterVersionApiFieldsPost | null };
 
 export type PageApiProps = Omit<ProductApiProps, 'bodyData'> & { bodyData: PageApiFieldsPost | PageApiFieldsPost | null };
+
+// API Props END //
+
+
 
 type NullableString = string | null;
 type NullableNumber = number | null
@@ -50,6 +55,18 @@ export type BookApiFieldsGet = BookBaseFields & {
     is_archived: boolean;
     archived_at: NullableString;
 };
+
+export type InitCreateAction = "needs_style" | "resume";
+
+export type BookInitApiFieldsGet = {
+    action: InitCreateAction;
+    book?: BookApiFieldsGet;
+};
+
+export type BookInitApiFieldsError = {
+    detail: string;
+};
+
 // Book Types END
 
 
