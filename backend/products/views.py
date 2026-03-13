@@ -1,15 +1,18 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.text import slugify
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .models import (
 	Book,
 	Character,
+	CharacterReferencePhoto,
 	CharacterVersion,
 	CoverVersion,
 	Page,
@@ -28,7 +31,6 @@ from .permissions import (
 	CharacterVersionPermission,
 	CoverVersionPermission,
 	PagesPermission,
-	can_anon_create,
 	ensure_anon_profile,
 	find_profile_by_fingerprint,
 	get_anon_profile,
@@ -48,6 +50,9 @@ from .services.generate_cover import generate_cover
 from orders.models import RetryPackOrder
 from orders.models import OrderItem
 
+FREE_TIER_CHARACTER_LIMIT = 3
+PAID_TIER_CHARACTER_LIMIT = 5
+
 
 def _get_related_book(instance):
 	if isinstance(instance, Book):
@@ -63,6 +68,12 @@ def _get_related_book(instance):
 
 def _permission_denied_response(detail="You do not have permission to update this book."):
 	return Response({"detail": detail}, status=status.HTTP_403_FORBIDDEN)
+
+
+class CharacterVersionPagination(PageNumberPagination):
+	page_size = 20
+	page_size_query_param = "page_size"
+	max_page_size = 100
 
 
 def _require_book_access(request, book, *, detail="You do not have permission to update this book."):
@@ -84,6 +95,52 @@ def _require_book_in_draft(book):
 			status=status.HTTP_409_CONFLICT,
 		)
 	return None
+
+
+def _get_character_limit_for_book(request, book) -> int:
+	if request.user and request.user.is_authenticated:
+		tier = get_tier_for_book(request.user, book)
+		if tier:
+			return PAID_TIER_CHARACTER_LIMIT
+	return FREE_TIER_CHARACTER_LIMIT
+
+
+def _scoped_character_queryset(request):
+	if request.user and request.user.is_authenticated:
+		queryset = Character.objects.filter(book__user=request.user)
+	else:
+		profile = get_anon_profile(request)
+		if not profile:
+			return Character.objects.none()
+		queryset = Character.objects.filter(book__session_key=str(profile.token))
+
+	book_id = request.query_params.get("book_id")
+	if book_id:
+		queryset = queryset.filter(book_id=book_id)
+
+	return queryset.prefetch_related("reference_photos").order_by("-created_at")
+
+
+def _scoped_character_version_queryset(request):
+	if request.user and request.user.is_authenticated:
+		queryset = CharacterVersion.objects.filter(character__book__user=request.user)
+	else:
+		profile = get_anon_profile(request)
+		if not profile:
+			return CharacterVersion.objects.none()
+		queryset = CharacterVersion.objects.filter(
+			character__book__session_key=str(profile.token)
+		)
+
+	book_id = request.query_params.get("book_id")
+	if book_id:
+		queryset = queryset.filter(character__book_id=book_id)
+
+	character_id = request.query_params.get("character") or request.query_params.get("character_id")
+	if character_id:
+		queryset = queryset.filter(character_id=character_id)
+
+	return queryset.order_by("-created_at")
 
 
 def _build_unique_book_slug(title, *, user=None, session_key=None, exclude_id=None):
@@ -206,12 +263,16 @@ def book_list_create(request):
 		instance = serializer.save(user=request.user, slug=resolved_slug)
 		return Response(BookSerializer(instance).data, status=status.HTTP_201_CREATED)
 
-	if not can_anon_create(request, "book_creations"):
-		return Response(
+	profile, created = ensure_anon_profile(request)
+	if profile.book_creations >= 1:
+		response = Response(
 			{"detail": "Anonymous users can only create one book."},
 			status=status.HTTP_403_FORBIDDEN,
 		)
-	profile, created = ensure_anon_profile(request)
+		if created or not get_anon_token(request):
+			set_anon_cookie(response, profile.token)
+		return response
+
 	resolved_slug = (incoming_slug or "").strip() or _build_unique_book_slug(
 		title,
 		session_key=str(profile.token),
@@ -255,6 +316,7 @@ def _build_init_create_payload(action, *, book=None):
 	return payload
 
 
+@ensure_csrf_cookie
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def book_init_create(request):
@@ -341,8 +403,12 @@ def book_detail(request, item_id):
 @permission_classes([CharacterPermission])
 def character_list_create(request):
 	if request.method == "GET":
-		queryset = Character.objects.all()
-		serializer = CharacterSerializer(queryset, many=True)
+		queryset = _scoped_character_queryset(request)
+		serializer = CharacterSerializer(
+			queryset,
+			many=True,
+			context={"request": request},
+		)
 		return Response(serializer.data)
 
 	book_id = request.data.get("book_id")
@@ -356,8 +422,27 @@ def character_list_create(request):
 			{"detail": "book and book_id must match."},
 			status=status.HTTP_400_BAD_REQUEST,
 		)
-	payload = request.data.copy()
-	payload["book"] = book_id
+	uploaded_reference_photos = request.FILES.getlist("reference_photos")
+	legacy_reference_photo = request.FILES.get("reference_photo")
+
+	if not uploaded_reference_photos and legacy_reference_photo:
+		uploaded_reference_photos = [legacy_reference_photo]
+
+	if len(uploaded_reference_photos) > 3:
+		return Response(
+			{"detail": "You can upload up to 3 reference photos."},
+			status=status.HTTP_400_BAD_REQUEST,
+		)
+
+	payload = {
+		"book": str(book_id),
+		"name": request.data.get("name"),
+		"gender": request.data.get("gender"),
+	}
+
+	if uploaded_reference_photos:
+		payload["reference_photo"] = uploaded_reference_photos[0]
+
 	serializer = CharacterSerializer(data=payload)
 	if not serializer.is_valid():
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -370,15 +455,49 @@ def character_list_create(request):
 	if draft_error:
 		return draft_error
 
+	character_limit = _get_character_limit_for_book(request, book)
+	existing_character_count = Character.objects.filter(book=book).count()
+	if existing_character_count >= character_limit:
+		return Response(
+			{
+				"detail": f"Character limit reached for this book. Max allowed is {character_limit}.",
+				"max_characters": character_limit,
+				"current_characters": existing_character_count,
+			},
+			status=status.HTTP_403_FORBIDDEN,
+		)
+
 	if request.user and request.user.is_authenticated:
 		instance = serializer.save(user=request.user)
-		return Response(CharacterSerializer(instance).data, status=status.HTTP_201_CREATED)
+		if uploaded_reference_photos:
+			CharacterReferencePhoto.objects.bulk_create(
+				[
+					CharacterReferencePhoto(character=instance, image=photo)
+					for photo in uploaded_reference_photos
+				]
+			)
+		instance.refresh_from_db()
+		return Response(
+			CharacterSerializer(instance, context={"request": request}).data,
+			status=status.HTTP_201_CREATED,
+		)
 
 	profile, created = ensure_anon_profile(request)
 	instance = serializer.save(created_by_anon_token=profile.token)
+	if uploaded_reference_photos:
+		CharacterReferencePhoto.objects.bulk_create(
+			[
+				CharacterReferencePhoto(character=instance, image=photo)
+				for photo in uploaded_reference_photos
+			]
+		)
+	instance.refresh_from_db()
 	profile.character_creations += 1
 	profile.save(update_fields=["character_creations", "last_seen_at"])
-	response = Response(CharacterSerializer(instance).data, status=status.HTTP_201_CREATED)
+	response = Response(
+		CharacterSerializer(instance, context={"request": request}).data,
+		status=status.HTTP_201_CREATED,
+	)
 	if created or not get_anon_token(request):
 		set_anon_cookie(response, profile.token)
 	return response
@@ -391,9 +510,11 @@ character_detail = _detail_view(Character, CharacterSerializer, [CharacterPermis
 @permission_classes([CharacterVersionPermission])
 def character_version_list_create(request):
 	if request.method == "GET":
-		queryset = CharacterVersion.objects.all()
-		serializer = CharacterVersionSerializer(queryset, many=True)
-		return Response(serializer.data)
+		queryset = _scoped_character_version_queryset(request)
+		paginator = CharacterVersionPagination()
+		page = paginator.paginate_queryset(queryset, request)
+		serializer = CharacterVersionSerializer(page, many=True)
+		return paginator.get_paginated_response(serializer.data)
 
 	character_id = request.data.get("character")
 	if not character_id:
@@ -422,23 +543,25 @@ def character_version_list_create(request):
 
 	if request.user and request.user.is_authenticated:
 		tier = get_tier_for_book(request.user, character.book)
-		base_limit = get_tier_limit_for_book(request.user, character.book)
-		allowed, allowance = consume_retry(
-			request.user,
-			"CHARACTER",
-			character.id,
-			base_limit,
-		)
-		if not allowed:
-			return Response(
-				{
-					"detail": "Retry limit reached for this character.",
-					"max_retries": allowance.max_retries,
-					"used_retries": allowance.used_retries,
-					"pricing_tier": serialize_tier(tier),
-				},
-				status=status.HTTP_403_FORBIDDEN,
+		has_existing_versions = CharacterVersion.objects.filter(character=character).exists()
+		if has_existing_versions:
+			base_limit = get_tier_limit_for_book(request.user, character.book)
+			allowed, allowance = consume_retry(
+				request.user,
+				"CHARACTER",
+				character.id,
+				base_limit,
 			)
+			if not allowed:
+				return Response(
+					{
+						"detail": "Retry limit reached for this character.",
+						"max_retries": allowance.max_retries,
+						"used_retries": allowance.used_retries,
+						"pricing_tier": serialize_tier(tier),
+					},
+					status=status.HTTP_403_FORBIDDEN,
+				)
 		order_item = (
 			OrderItem.objects.select_related("order")
 			.filter(
@@ -532,23 +655,25 @@ def cover_version_list_create(request):
 
 	if request.user and request.user.is_authenticated:
 		tier = get_tier_for_book(request.user, book)
-		base_limit = get_tier_limit_for_book(request.user, book)
-		allowed, allowance = consume_retry(
-			request.user,
-			"COVER",
-			book.id,
-			base_limit,
-		)
-		if not allowed:
-			return Response(
-				{
-					"detail": "Retry limit reached for this cover.",
-					"max_retries": allowance.max_retries,
-					"used_retries": allowance.used_retries,
-					"pricing_tier": serialize_tier(tier),
-				},
-				status=status.HTTP_403_FORBIDDEN,
+		has_existing_versions = CoverVersion.objects.filter(book=book).exists()
+		if has_existing_versions:
+			base_limit = get_tier_limit_for_book(request.user, book)
+			allowed, allowance = consume_retry(
+				request.user,
+				"COVER",
+				book.id,
+				base_limit,
 			)
+			if not allowed:
+				return Response(
+					{
+						"detail": "Retry limit reached for this cover.",
+						"max_retries": allowance.max_retries,
+						"used_retries": allowance.used_retries,
+						"pricing_tier": serialize_tier(tier),
+					},
+					status=status.HTTP_403_FORBIDDEN,
+				)
 		order_item = (
 			OrderItem.objects.select_related("order")
 			.filter(book=book, order__customer=request.user, order__status="paid")
@@ -690,23 +815,25 @@ def page_version_list_create(request):
 
 	if request.user and request.user.is_authenticated:
 		tier = get_tier_for_book(request.user, page.book)
-		base_limit = get_tier_limit_for_book(request.user, page.book)
-		allowed, allowance = consume_retry(
-			request.user,
-			"PAGE",
-			page.id,
-			base_limit,
-		)
-		if not allowed:
-			return Response(
-				{
-					"detail": "Retry limit reached for this page.",
-					"max_retries": allowance.max_retries,
-					"used_retries": allowance.used_retries,
-					"pricing_tier": serialize_tier(tier),
-				},
-				status=status.HTTP_403_FORBIDDEN,
+		has_existing_versions = PageVersion.objects.filter(page=page).exists()
+		if has_existing_versions:
+			base_limit = get_tier_limit_for_book(request.user, page.book)
+			allowed, allowance = consume_retry(
+				request.user,
+				"PAGE",
+				page.id,
+				base_limit,
 			)
+			if not allowed:
+				return Response(
+					{
+						"detail": "Retry limit reached for this page.",
+						"max_retries": allowance.max_retries,
+						"used_retries": allowance.used_retries,
+						"pricing_tier": serialize_tier(tier),
+					},
+					status=status.HTTP_403_FORBIDDEN,
+				)
 		order_item = (
 			OrderItem.objects.select_related("order")
 			.filter(book=page.book, order__customer=request.user, order__status="paid")

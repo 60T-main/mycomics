@@ -601,6 +601,9 @@ button, .button {
     .edit-section.book{
       @apply gap-0 lg:!flex-row lg:items-start lg:mx-0;
     }
+    .edit-section.disabled{
+      @apply blur pointer-events-none;
+    }
     
     .characters-div{
       @apply flex flex-row items-center justify-center py-12 gap-2 lg:gap-6 xl:gap-12 ;
@@ -614,15 +617,33 @@ button, .button {
     /* Modal */
 
     .modal-overlay{
-      @apply absolute w-full h-full top-0 z-99999999999 backdrop-blur-xs;
+      @apply fixed inset-0 z-99999999999 bg-black/25 backdrop-blur-sm;
     }
     .modal-content{
-      @apply flex items-center justify-center z-99999 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 relative border-2 w-9/10}
+      @apply flex items-center justify-center z-99999 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 relative border-2 w-9/10 bg-white rounded-2xl p-4;}
     .modal-content img{
       @apply w-80 ;
     }
-    .modal-content button{
-      @apply absolute top-2 right-3 text-3xl;
+
+    .confirmation-modal{
+      @apply flex flex-col w-full max-w-md gap-3;
+    }
+
+    .confirmation-actions{
+      @apply mt-2 flex items-center justify-end gap-2;
+    }
+
+    .confirmation-cancel,
+    .confirmation-confirm{
+      @apply border-2 rounded-xl px-3 py-2 text-sm;
+    }
+
+    .confirmation-cancel{
+      @apply bg-white;
+    }
+
+    .confirmation-confirm{
+      @apply bg-red-500 text-white border-red-500;
     }
     
 

@@ -5,31 +5,48 @@ import { useDropzone } from "react-dropzone";
 
 type SetUploadedProps = {
   setUploaded: Dispatch<SetStateAction<boolean>>;
+  onFilesChange?: (files: File[]) => void;
+  previews: string[];
+  setPreviews: (previews: any) => void;
 };
 
-function ImageUpload({ setUploaded }: SetUploadedProps) {
-  const [previews, setPreviews] = useState<string[]>([]);
+function ImageUpload({
+  setUploaded,
+  onFilesChange,
+  previews,
+  setPreviews,
+}: SetUploadedProps) {
+  const [files, setFiles] = useState<File[]>([]);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "image/*": [] },
     multiple: true,
     maxFiles: 3,
     onDrop: (acceptedFiles) => {
+      setFiles(acceptedFiles);
       const urls = acceptedFiles.map((file) => URL.createObjectURL(file));
       setPreviews(urls);
     },
     onDropRejected: (rejections) => {
       console.warn("Rejected files:", rejections);
+      setFiles([]);
       setPreviews([]);
     },
   });
 
   const handleRemove = (indexToRemove: number) => {
-    setPreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
+    setFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+    setPreviews((prev: any[]) =>
+      prev.filter((_, index) => index !== indexToRemove),
+    );
   };
 
   useEffect(() => {
     setUploaded(previews.length > 0);
   }, [previews, setUploaded]);
+
+  useEffect(() => {
+    onFilesChange?.(files);
+  }, [files, onFilesChange]);
 
   useEffect(() => {
     return () => {

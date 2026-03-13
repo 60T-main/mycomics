@@ -2,8 +2,9 @@
 export type ProductApiProps = {
     method: 'GET' | "POST" | "PUT" | "PATCH" | "DELETE";
     id: null | string;
-    bodyData: BookApiFieldsPost | BookApiFieldsPatch | null;
+    bodyData: BookApiFieldsPost | BookApiFieldsPatch | CharacterApiFieldsPost | CharacterApiFieldsPatch | FormData | null;
     product: 'books' | 'cover' | 'cover versions' | 'characters' | 'character versions' | 'pages' | 'page versions'
+    queryParams?: Record<string, string | number | boolean | null | undefined>;
 };
 
 export type CharacterApiProps = Omit<ProductApiProps, 'bodyData'> & { bodyData: CharacterApiFieldsPost | CharacterApiFieldsPatch | null };
@@ -18,6 +19,15 @@ export type PageApiProps = Omit<ProductApiProps, 'bodyData'> & { bodyData: PageA
 
 type NullableString = string | null;
 type NullableNumber = number | null
+
+type PricingTierInfo = {
+    id: string;
+    name: string;
+    code: string;
+    price: string;
+    currency: string;
+    max_retries_per_unit: number;
+}
 
 type BookStatus = "DRAFT" | "IN_PROGRESS" | "COMPLETE" | "LOCKED" | "ORDERED" | "PRINTED" | "ARCHIVED";
 
@@ -54,6 +64,7 @@ export type BookApiFieldsGet = BookBaseFields & {
     total_generation_cost_usd: string | number;
     is_archived: boolean;
     archived_at: NullableString;
+    pricing_tier?: PricingTierInfo | null;
 };
 
 export type InitCreateAction = "needs_style" | "resume";
@@ -74,6 +85,7 @@ export type BookInitApiFieldsError = {
 export type CharacterBaseFields = {
     book: string;
     name: string;
+    gender: string;
     reference_photo: NullableString;
 };
 
@@ -83,6 +95,7 @@ export type CharacterApiFieldsPatch = Partial<CharacterBaseFields>;
 
 export type CharacterApiFieldsGet = CharacterBaseFields & {
     id: string;
+    reference_photos?: string[];
     current_version: NullableString;
     total_generation_attempts: number;
     free_retry_used: boolean;

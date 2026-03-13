@@ -7,6 +7,12 @@ import uuid
 # Create your models here.
 
 class Character(models.Model):
+
+    GENDER_CHOICES = [
+        ("male", "Male"),
+        ("female", "Female"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     user = models.ForeignKey(
@@ -20,6 +26,7 @@ class Character(models.Model):
 
     book = models.ForeignKey("Book", on_delete=models.CASCADE, related_name="characters")
     name = models.CharField(max_length=100)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default="male")
 
     reference_photo = models.ImageField(upload_to="characters/reference/")
 
@@ -39,6 +46,20 @@ class Character(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class CharacterReferencePhoto(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    character = models.ForeignKey(
+        Character,
+        related_name="reference_photos",
+        on_delete=models.CASCADE,
+    )
+    image = models.ImageField(upload_to="characters/reference/")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
     
 
 

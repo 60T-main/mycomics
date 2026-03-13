@@ -134,7 +134,9 @@ class CharacterPermission(BasePermission):
 		if request.user and request.user.is_authenticated:
 			return True
 		if request.method == "POST":
-			return can_anon_create(request, "character_creations")
+			can_anon_create_response = can_anon_create(request, "character_creations")
+			print("can_anon_create returned:",can_anon_create_response)
+			return can_anon_create_response
 		if request.method in {"PUT", "PATCH"}:
 			return False
 		return request.method == "DELETE"

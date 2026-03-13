@@ -168,12 +168,14 @@ def create_order(request):
 			status="pending",
 		)
 		for book, quantity, unit_price in validated_items:
-			OrderItem.objects.create(
+			order_item = OrderItem.objects.create(
 				order=order,
 				book=book,
 				quantity=quantity,
 				unit_price=unit_price,
 			)
+			order_item.book.status = "IN_PROGRESS"
+			order_item.save()
 
 	return Response(
 		{"order_id": order.order_id, "status": order.status},

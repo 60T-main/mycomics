@@ -69,8 +69,6 @@ export default function CreatePage() {
           return;
         }
 
-        console.log(response.action);
-
         if (response.action === "needs_style") {
           setIsRedirecting(true);
           router.replace("/create/new");
