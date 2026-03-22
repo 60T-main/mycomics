@@ -2,7 +2,7 @@
 export type ProductApiProps = {
     method: 'GET' | "POST" | "PUT" | "PATCH" | "DELETE";
     id: null | string;
-    bodyData: BookApiFieldsPost | BookApiFieldsPatch | CharacterApiFieldsPost | CharacterApiFieldsPatch | FormData | null;
+    bodyData: BookApiFieldsPost | BookApiFieldsPatch | CharacterApiFieldsPost | CharacterApiFieldsPatch | CoverVersionApiFieldsPost | FormData | null;
     product: 'books' | 'cover' | 'cover versions' | 'characters' | 'character versions' | 'pages' | 'page versions'
     queryParams?: Record<string, string | number | boolean | null | undefined>;
 };
@@ -138,9 +138,7 @@ export type CharacterVersionApiFieldsGet = CharacterVersionBaseFields & {
 export type CoverVersionBaseFields = {
     book: string;
     title_text: string;
-    prompt_snapshot: string;
     aspect_ratio: NullableString;
-    generation_job_id: string;
     subtitle_text: NullableString;
     author_name: NullableString;
     title_position: NullableString;
@@ -154,6 +152,7 @@ export type CoverVersionApiFieldsPatch = Partial<CoverVersionBaseFields>;
 
 export type CoverVersionApiFieldsGet = CoverVersionBaseFields & {
     id: string;
+    prompt_snapshot: NullableString;
     generated_image: NullableString;
     full_spread_image: NullableString;
     version_number: NullableNumber;

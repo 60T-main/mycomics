@@ -145,7 +145,25 @@ export default function PageEditSection() {
 
   const preparedCount = sortedPreparedPages.length;
 
-  const disabledSection = <div className="w-full text-center"> DISABLED </div>;
+  const disabledSection = (
+    <div className="flex flex-col gap-4 w-9/10 md:w-1/2 items-center justify-center mx-auto mt-12 rounded-2xl border-2 border-orange-200 bg-orange-50 px-6 py-8 text-center">
+      <p className="text-lg font-bold text-neutral-900">
+        გვერდების სექცია უფასო რეჟიმში მიუწვდომელია
+      </p>
+      <p className="mt-2 text-sm md:text-base text-neutral-700">
+        გვერდების შექმნის ფუნქცია ხელმისაწვდომია მხოლოდ წიგნის მყიდველებისთვის.
+        <br />
+        <br />
+        გასაგრძელებლად, შეიძინე წიგნი.👇
+      </p>
+      <button
+        type="button"
+        className="mt-4 rounded-xl border-2 border-neutral-900 bg-white px-5 py-2 font-bold text-neutral-900 transition hover:bg-neutral-900 hover:text-white w-4/5 md:w-1/2"
+      >
+        წიგნის შეძენა
+      </button>
+    </div>
+  );
 
   if (bookState && bookState?.book?.status === "DRAFT") return disabledSection;
 
@@ -349,6 +367,12 @@ export default function PageEditSection() {
                               : value,
                         }))
                       }
+                      previews={[]}
+                      setPreviews={function (previews: any): void {
+                        throw new Error(
+                          "ImageUpload function not implemented.",
+                        );
+                      }}
                     />
                     <p className="text-xs md:text-sm text-neutral-600 mt-2">
                       *ფოტო და ტექსტური პრომპტი ერთდროულად არ გამოიყენება.

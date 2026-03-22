@@ -1,11 +1,16 @@
 "use client";
 
+import fetchProducts from "../services/product/product-api";
+
+import { useBookStore } from "../store/books/useBookStatesStore";
+
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 type CoverFormState = {
   template: string;
   title: string;
   subtitle: string;
+  author: string;
 };
 
 const COVER_TEMPLATES = [
@@ -20,6 +25,7 @@ export default function CoverEditSection() {
     template: "",
     title: "",
     subtitle: "",
+    author: "",
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [generatedCoverImage, setGeneratedCoverImage] = useState<string | null>(
@@ -27,6 +33,9 @@ export default function CoverEditSection() {
   );
   const previewRef = useRef<HTMLDivElement | null>(null);
   const previousGeneratedCoverImageRef = useRef<string | null>(null);
+
+  const { bookState } = useBookStore();
+  const bookId = bookState?.book?.id ?? null;
 
   useEffect(() => {
     if (
@@ -43,8 +52,12 @@ export default function CoverEditSection() {
     previousGeneratedCoverImageRef.current = generatedCoverImage;
   }, [generatedCoverImage]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!bookId) {
+      return;
+    }
 
     if (!formData.template.trim() || !formData.title.trim()) {
       setErrorMessage("აირჩიე შაბლონი და შეიყვანე წიგნის სახელი");
@@ -54,6 +67,30 @@ export default function CoverEditSection() {
     const selectedTemplate = COVER_TEMPLATES.find(
       (template) => template.value === formData.template,
     );
+
+    try {
+      const data = await fetchProducts({
+        method: "POST",
+        id: null,
+        bodyData: {
+          book: bookId,
+          title_text: formData.title.trim(),
+          subtitle_text: formData.subtitle.trim(),
+          aspect_ratio: null,
+          author_name: formData.author.trim(),
+          title_position: null,
+          thumbnail: null,
+          seed: null,
+        },
+        product: "cover",
+      });
+
+      if (!data) {
+        throw new Error("Failed to fetch characters");
+      }
+    } catch (error) {}
+
+    // set returned genertaed image here
     setGeneratedCoverImage(selectedTemplate?.image ?? "/style-dramatic.jpeg");
     setErrorMessage(null);
   };
@@ -151,7 +188,7 @@ export default function CoverEditSection() {
 
             <fieldset className="w-full flex flex-col gap-4">
               <label className="flex flex-col gap-2">
-                <span>2) წიგნის სახელი</span>
+                <p className="font-bold">2) წიგნის სახელი</p>
                 <input
                   type="text"
                   name="coverTitle"
@@ -169,7 +206,7 @@ export default function CoverEditSection() {
               </label>
 
               <label className="flex flex-col gap-2">
-                <span>3) ქვე-სათაური (არასავალდებულო)</span>
+                <p className="font-bold">3) ქვე-სათაური (არასავალდებულო)</p>
                 <input
                   type="text"
                   name="coverSubtitle"
@@ -184,9 +221,25 @@ export default function CoverEditSection() {
                   }
                 />
               </label>
+              <label className="flex flex-col gap-2">
+                <p className="font-bold">4) საჩუქრის ავტორი (არასავალდებულო)</p>
+                <input
+                  type="text"
+                  name="coverSubtitle"
+                  className="border-2 rounded-xl px-3 py-2"
+                  placeholder="მაგ: ნინი"
+                  value={formData.author}
+                  onChange={(event) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      author: event.target.value,
+                    }))
+                  }
+                />
+              </label>
 
               <button type="submit" className="border-2 rounded-2xl py-2 mt-2">
-                დამატება და გაგრძელება
+                ყდის დამატება
               </button>
             </fieldset>
           </form>
