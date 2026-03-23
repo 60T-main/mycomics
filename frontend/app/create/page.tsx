@@ -32,16 +32,15 @@ import { useRouter } from "next/navigation";
 export default function CreatePage() {
   const router = useRouter();
   useScreenSizeListener();
-  const { section, setSection } = useSelectSectionStore();
+  const { section } = useSelectSectionStore();
   const { isLgUp } = useScreenSizeStore();
 
-  const { bookState, setBookState } = useBookStore();
+  const { setBookState } = useBookStore();
 
   const { loadings } = useLoadingStore();
   const [isInitResolved, setIsInitResolved] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  const { setLoading, clearLoading } = useLoadingStore.getState();
   const { errors } = useErrorStore.getState();
 
   useEffect(() => {

@@ -1,16 +1,44 @@
 import json
+import uuid
 from decimal import Decimal
+from io import BytesIO
+
+from PIL import Image
 
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
+from django.core.files.base import ContentFile
 from django.utils import timezone
 
 from ..models import Page, PageVersion
 from billing.models import LedgerEntry
 from .call_nano_banana import call_nano_banana
 
+
+def _build_thumbnail(image_file, *, max_size=(512, 512), name_prefix="page_thumb"):
+    if not image_file:
+        return None
+
+    image_file.seek(0)
+    raw_bytes = image_file.read()
+    image_file.seek(0)
+
+    if not raw_bytes:
+        return None
+
+    with Image.open(BytesIO(raw_bytes)) as image:
+        thumbnail = image.copy()
+        thumbnail.thumbnail(max_size)
+        thumb_bytes = BytesIO()
+        thumbnail.save(thumb_bytes, format="PNG")
+
+    thumbnail_file = ContentFile(thumb_bytes.getvalue())
+    thumbnail_file.name = f"{name_prefix}.png"
+    return thumbnail_file
+
 def generate_page(user, book, order, page_number:int, prompt:dict):
     prompt_text = json.dumps(prompt) if isinstance(prompt, dict) else str(prompt)
+    seed = uuid.uuid4().int % 2147483647
 
     # Phase 1: create/lock page and create a GENERATING version
     with transaction.atomic():
@@ -49,6 +77,7 @@ def generate_page(user, book, order, page_number:int, prompt:dict):
         page_version = PageVersion.objects.create(
             page=page,
             version_number=version_number,
+            seed=seed,
             status="GENERATING",
         )
 
@@ -78,9 +107,17 @@ def generate_page(user, book, order, page_number:int, prompt:dict):
             page.save()
             return page_version
 
-        page_version.prompt = prompt_snapshot
+        page_version.prompt = (
+            json.dumps(prompt_snapshot)
+            if isinstance(prompt_snapshot, dict)
+            else str(prompt_snapshot)
+        )
         page_version.nano_request_id = response_id
         page_version.image = image_file
+        page_version.thumbnail = _build_thumbnail(
+            image_file,
+            name_prefix=f"page_{page_version.id}_thumb",
+        )
         page_version.generation_cost_usd = generation_cost_usd
         page_version.status = "COMPLETED"
 

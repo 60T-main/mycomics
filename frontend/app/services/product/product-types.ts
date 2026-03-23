@@ -136,14 +136,15 @@ export type CharacterVersionApiFieldsGet = CharacterVersionBaseFields & {
 
 // Cover version types
 export type CoverVersionBaseFields = {
-    book: string;
+    book_id: string;
     title_text: string;
-    aspect_ratio: NullableString;
-    subtitle_text: NullableString;
-    author_name: NullableString;
-    title_position: NullableString;
-    thumbnail: NullableString;
-    seed: NullableString;
+    prompt_snapshot?: Record<string, unknown> | string | null;
+    aspect_ratio?: NullableString;
+    subtitle_text?: NullableString;
+    author_name?: NullableString;
+    title_position?: NullableString;
+    thumbnail?: NullableString;
+    seed?: NullableString;
 };
 
 export type CoverVersionApiFieldsPost = CoverVersionBaseFields;
@@ -225,14 +226,17 @@ export type PageVersionApiFieldsPatch = Partial<PageVersionBaseFields>;
 
 export type PageVersionApiFieldsGet = PageVersionBaseFields & {
     id: string;
-    generated_image: NullableString;
+    image: NullableString;
+    thumbnail: NullableString;
     full_spread_image: NullableString;
     version_number: NullableNumber;
     ledger_entry: NullableString;
     generation_job_id: string;
+    seed: NullableString;
     generation_cost_usd: NullableString;
     status: GenerationStatus;
     error_message: NullableString;
+    generation_time_ms: NullableNumber;
     nano_request_id: NullableString;
     created_at: string;
     updated_at: string;

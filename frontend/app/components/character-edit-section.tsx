@@ -2,11 +2,14 @@
 
 import ImageUpload from "./image-upload";
 import ConfirmationModal from "./confirmation-modal";
+import ImageLightboxModal from "./image-lightbox-modal";
 import fetchProducts from "../services/product/product-api";
 
 import { useCharacterStore } from "../store/characters/useCharacterStatesStore";
 import { useBookStore } from "../store/books/useBookStatesStore";
 import { CharacterApiFieldsGet } from "../services/product/product-types";
+
+import { useSelectSectionStore } from "../store/useSelectSectionStore";
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
@@ -69,6 +72,7 @@ export default function CharacterEditSection() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [isCharactersOpen, setIsCharactersOpen] = useState(false);
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] =
     useState<CharacterApiFieldsGet | null>(null);
   const [characterLimit, setCharacterLimit] = useState(
@@ -79,6 +83,8 @@ export default function CharacterEditSection() {
   const charactersDetailsRef = useRef<HTMLDetailsElement | null>(null);
   const hasInitializedCharactersRef = useRef(false);
   const previousCharactersCountRef = useRef(0);
+
+  const { setSection } = useSelectSectionStore();
 
   useEffect(() => {
     if (!hasInitializedCharactersRef.current) {
@@ -331,6 +337,12 @@ export default function CharacterEditSection() {
         onConfirm={confirmDeleteCharacter}
         onCancel={closeDeleteModal}
       />
+      <ImageLightboxModal
+        isOpen={Boolean(expandedImage)}
+        imageSrc={expandedImage}
+        imageAlt="პერსონაჟის ფოტო"
+        onClose={() => setExpandedImage(null)}
+      />
       <article className="character-article lg:w-7/10 xl:w-6/10 mb-12">
         <h2>ნაბიჯი 2/4 • პერსონაჟის დამატება</h2>
 
@@ -453,7 +465,7 @@ export default function CharacterEditSection() {
             onToggle={(event) => {
               setIsCharactersOpen(event.currentTarget.open);
             }}
-            className="w-full max-w-3xl rounded-2xl border-2 border-neutral-200 bg-white px-4 py-3"
+            className="w-full max-w-3xl rounded-2xl border-2 border-neutral-200 bg-white px-4 py-3 scroll-mt-20"
           >
             <summary className="cursor-pointer select-none font-bold">
               ჩემი პერსონაჟები ({characterList.length})
@@ -469,81 +481,94 @@ export default function CharacterEditSection() {
             )}
 
             {characterList.length > 0 && (
-              <div className="mt-2 flex flex-col gap-3">
-                {characterList.map((character) => (
-                  <div
-                    key={character.id}
-                    className="flex flex-col lg:flex-row items-center gap-3 rounded-xl border-2 border-neutral-200 p-3"
-                  >
-                    <div className="flex items-center gap-1">
-                      {getCharacterPreviewList(character).map(
-                        (photoUrl, index) => (
-                          <img
-                            key={`${character.id}-${index}`}
-                            src={photoUrl}
-                            alt={`${character.name} reference ${index + 1}`}
-                            className="h-60 w-50 rounded-lg object-cover border-2"
-                          />
-                        ),
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      {editingId === character.id ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <input
-                            value={editingName}
-                            onChange={(event) =>
-                              setEditingName(event.target.value)
-                            }
-                            className="border-2 rounded-lg px-2 py-1 w-full"
-                            maxLength={80}
-                          />
-                          <div className="flex gap-4">
-                            <button
-                              type="button"
-                              onClick={() => saveEditName(character)}
-                              className="border-2 rounded-lg px-2 py-1"
-                            >
-                              შენახვა
-                            </button>
-                            <button
-                              type="button"
-                              onClick={cancelEditName}
-                              className="border-2 rounded-lg px-2 py-1"
-                            >
-                              გაუქმება
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold truncate">{character.name}</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {editingId !== character.id && (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => startEditName(character)}
-                          className="border-2 rounded-lg px-2 py-1 text-xs md:text-sm"
-                        >
-                          სახელის შეცვლა
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => requestDeleteCharacter(character)}
-                          className="border-2 rounded-lg px-2 py-1 text-xs md:text-sm text-red-600"
-                        >
-                          წაშლა
-                        </button>
+              <>
+                <div className="mt-2 flex flex-col gap-3">
+                  {characterList.map((character) => (
+                    <div
+                      key={character.id}
+                      className="flex flex-col lg:flex-row items-center gap-3 rounded-xl border-2 border-neutral-200 p-3"
+                    >
+                      <div className="flex items-center gap-1">
+                        {getCharacterPreviewList(character).map(
+                          (photoUrl, index) => (
+                            <img
+                              key={`${character.id}-${index}`}
+                              src={photoUrl}
+                              alt={`${character.name} reference ${index + 1}`}
+                              className="h-60 w-50 rounded-lg object-cover border-2 cursor-zoom-in"
+                              onClick={() => setExpandedImage(photoUrl)}
+                            />
+                          ),
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+
+                      <div className="flex-1 min-w-0">
+                        {editingId === character.id ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <input
+                              value={editingName}
+                              onChange={(event) =>
+                                setEditingName(event.target.value)
+                              }
+                              className="border-2 rounded-lg px-2 py-1 w-full"
+                              maxLength={80}
+                            />
+                            <div className="flex gap-4">
+                              <button
+                                type="button"
+                                onClick={() => saveEditName(character)}
+                                className="border-2 rounded-lg px-2 py-1"
+                              >
+                                შენახვა
+                              </button>
+                              <button
+                                type="button"
+                                onClick={cancelEditName}
+                                className="border-2 rounded-lg px-2 py-1"
+                              >
+                                გაუქმება
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold truncate">
+                              {character.name}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {editingId !== character.id && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => startEditName(character)}
+                            className="border-2 rounded-lg px-2 py-1 text-xs md:text-sm"
+                          >
+                            სახელის შეცვლა
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => requestDeleteCharacter(character)}
+                            className="border-2 rounded-lg px-2 py-1 text-xs md:text-sm text-red-600"
+                          >
+                            წაშლა
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    setSection("cover");
+                  }}
+                  className="border-2 rounded-2xl py-2 mt-2 w-full hover:bg-[var(--color-primary)] transition-all duration-200"
+                >
+                  {isSubmitting ? "იტვირთება..." : "გაგრძელება"}
+                </button>
+              </>
             )}
           </details>
         </div>

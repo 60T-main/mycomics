@@ -8,9 +8,16 @@ import { ReactNode } from "react";
 type ModalProps = {
   children: ReactNode;
   onClose: () => void;
+  overlayClassName?: string;
+  contentClassName?: string;
 };
 
-export default function Modal({ children, onClose }: ModalProps) {
+export default function Modal({
+  children,
+  onClose,
+  overlayClassName,
+  contentClassName,
+}: ModalProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -20,8 +27,20 @@ export default function Modal({ children, onClose }: ModalProps) {
   if (!mounted) return null;
 
   return createPortal(
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div
+      className={
+        overlayClassName ? `modal-overlay ${overlayClassName}` : "modal-overlay"
+      }
+      onClick={onClose}
+    >
+      <div
+        className={
+          contentClassName
+            ? `modal-content ${contentClassName}`
+            : "modal-content"
+        }
+        onClick={(e) => e.stopPropagation()}
+      >
         {children}
       </div>
     </div>,

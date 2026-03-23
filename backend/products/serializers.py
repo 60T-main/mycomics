@@ -55,6 +55,13 @@ class CharacterVersionSerializer(serializers.ModelSerializer):
 
 
 class CoverVersionSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Keep preview-safe media in API responses; hide full-resolution assets.
+        data["generated_image"] = None
+        data["full_spread_image"] = None
+        return data
+
     class Meta:
         model = CoverVersion
 
@@ -68,6 +75,12 @@ class PageSerializer(serializers.ModelSerializer):
 
 
 class PageVersionSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Keep preview-safe media in API responses; hide full-resolution assets.
+        data["image"] = None
+        return data
+
     class Meta:
         model = PageVersion
         fields = "__all__"

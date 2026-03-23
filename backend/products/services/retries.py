@@ -24,6 +24,7 @@ def get_tier_limit_for_book(user, book) -> int | None:
 	tier = get_tier_for_book(user, book)
 	if not tier:
 		return None
+	# return tier.max_retries_per_unit
 	return tier.max_retries_per_unit
 
 

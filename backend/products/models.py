@@ -311,6 +311,8 @@ class PageVersion(models.Model):
 
     # API tracking
     nano_request_id = models.CharField(max_length=255,null=True, blank=True)
+    generation_job_id = models.UUIDField(default=uuid.uuid4, editable=False)
+    seed = models.BigIntegerField(null=True, blank=True)
     ledger_entry = models.ForeignKey(
     "billing.LedgerEntry",
     null=True,
@@ -326,6 +328,7 @@ class PageVersion(models.Model):
 
     # Output
     image = models.ImageField(null=True, blank=True, upload_to="pages/")
+    thumbnail = models.ImageField(null=True, blank=True, upload_to="pages/")
 
     status = models.CharField(
         max_length=20,
@@ -337,6 +340,8 @@ class PageVersion(models.Model):
         ],
         default="PENDING"
     )
+    error_message = models.TextField(null=True, blank=True)
+    generation_time_ms = models.IntegerField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

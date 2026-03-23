@@ -46,7 +46,7 @@ from .services.retries import (
 )
 from .services.generate_page import generate_page
 from .services.generate_character import generate_character
-from .services.generate_cover import generate_cover
+from .services.generate_cover import generate_cover, generate_cover_anonymous
 from orders.models import RetryPackOrder
 from orders.models import OrderItem
 
@@ -139,6 +139,58 @@ def _scoped_character_version_queryset(request):
 	character_id = request.query_params.get("character") or request.query_params.get("character_id")
 	if character_id:
 		queryset = queryset.filter(character_id=character_id)
+
+	return queryset.order_by("-created_at")
+
+
+def _scoped_cover_version_queryset(request):
+	if request.user and request.user.is_authenticated:
+		queryset = CoverVersion.objects.filter(book__user=request.user)
+	else:
+		profile = get_anon_profile(request)
+		if not profile:
+			return CoverVersion.objects.none()
+		queryset = CoverVersion.objects.filter(book__session_key=str(profile.token))
+
+	book_id = request.query_params.get("book_id")
+	if book_id:
+		queryset = queryset.filter(book_id=book_id)
+
+	return queryset.order_by("-created_at")
+
+
+def _scoped_page_queryset(request):
+	if request.user and request.user.is_authenticated:
+		queryset = Page.objects.filter(book__user=request.user)
+	else:
+		profile = get_anon_profile(request)
+		if not profile:
+			return Page.objects.none()
+		queryset = Page.objects.filter(book__session_key=str(profile.token))
+
+	book_id = request.query_params.get("book_id")
+	if book_id:
+		queryset = queryset.filter(book_id=book_id)
+
+	return queryset.order_by("page_number")
+
+
+def _scoped_page_version_queryset(request):
+	if request.user and request.user.is_authenticated:
+		queryset = PageVersion.objects.filter(page__book__user=request.user)
+	else:
+		profile = get_anon_profile(request)
+		if not profile:
+			return PageVersion.objects.none()
+		queryset = PageVersion.objects.filter(page__book__session_key=str(profile.token))
+
+	book_id = request.query_params.get("book_id")
+	if book_id:
+		queryset = queryset.filter(page__book_id=book_id)
+
+	page_id = request.query_params.get("page") or request.query_params.get("page_id")
+	if page_id:
+		queryset = queryset.filter(page_id=page_id)
 
 	return queryset.order_by("-created_at")
 
@@ -630,7 +682,7 @@ character_version_detail = _detail_view(
 @permission_classes([CoverVersionPermission])
 def cover_version_list_create(request):
 	if request.method == "GET":
-		queryset = CoverVersion.objects.all()
+		queryset = _scoped_cover_version_queryset(request)
 		serializer = CoverVersionSerializer(queryset, many=True)
 		return Response(serializer.data)
 
@@ -712,20 +764,20 @@ def cover_version_list_create(request):
 			status=status.HTTP_403_FORBIDDEN,
 		)
 	profile, created = ensure_anon_profile(request)
-	payload = request.data.copy()
-	payload["book"] = book_id
-	serializer = CoverVersionSerializer(data=payload)
-	if not serializer.is_valid():
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-	last_version = (
-		CoverVersion.objects.filter(book=book)
-		.order_by("-version_number")
-		.first()
-	)
-	next_version = (last_version.version_number if last_version else 0) + 1
-	instance = serializer.save(
-		created_by_anon_token=profile.token,
-		version_number=next_version,
+	prompt_snapshot = request.data.get("prompt_snapshot", request.data.get("prompt"))
+	seed = request.data.get("seed")
+	if seed == "":
+		seed = None
+	instance = generate_cover_anonymous(
+		profile.token,
+		book,
+		prompt_snapshot,
+		title_text=request.data.get("title_text") or book.title,
+		subtitle_text=request.data.get("subtitle_text"),
+		author_name=request.data.get("author_name"),
+		title_position=request.data.get("title_position"),
+		aspect_ratio=request.data.get("aspect_ratio") or "2:3",
+		seed=seed,
 	)
 	profile.cover_generations += 1
 	profile.save(update_fields=["cover_generations", "last_seen_at"])
@@ -746,7 +798,7 @@ cover_version_detail = _detail_view(CoverVersion, CoverVersionSerializer, [Cover
 @permission_classes([PagesPermission])
 def page_list_create(request):
 	if request.method == "GET":
-		queryset = Page.objects.filter(book__user=request.user)
+		queryset = _scoped_page_queryset(request)
 		serializer = PageSerializer(queryset, many=True)
 		return Response(serializer.data)
 
@@ -785,7 +837,7 @@ page_detail = _detail_view(Page, PageSerializer, [PagesPermission])
 @permission_classes([PagesPermission])
 def page_version_list_create(request):
 	if request.method == "GET":
-		queryset = PageVersion.objects.all()
+		queryset = _scoped_page_version_queryset(request)
 		serializer = PageVersionSerializer(queryset, many=True)
 		return Response(serializer.data)
 
