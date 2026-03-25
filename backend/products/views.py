@@ -17,6 +17,7 @@ from .models import (
 	CoverVersion,
 	Page,
 	PageVersion,
+	RetryAllowance,
 )
 from .serializers import (
 	BookSerializer,
@@ -52,6 +53,7 @@ from orders.models import OrderItem
 
 FREE_TIER_CHARACTER_LIMIT = 3
 PAID_TIER_CHARACTER_LIMIT = 5
+PAGE_RETRY_BASE_LIMIT = 3
 
 
 def _get_related_book(instance):
@@ -716,16 +718,16 @@ def cover_version_list_create(request):
 				book.id,
 				base_limit,
 			)
-			if not allowed:
-				return Response(
-					{
-						"detail": "Retry limit reached for this cover.",
-						"max_retries": allowance.max_retries,
-						"used_retries": allowance.used_retries,
-						"pricing_tier": serialize_tier(tier),
-					},
-					status=status.HTTP_403_FORBIDDEN,
-				)
+			# if not allowed:
+			# 	return Response(
+			# 		{
+			# 			"detail": "Retry limit reached for this cover.",
+			# 			"max_retries": allowance.max_retries,
+			# 			"used_retries": allowance.used_retries,
+			# 			"pricing_tier": serialize_tier(tier),
+			# 		},
+			# 		status=status.HTTP_403_FORBIDDEN,
+			# 	)
 		order_item = (
 			OrderItem.objects.select_related("order")
 			.filter(book=book, order__customer=request.user, order__status="paid")
@@ -867,9 +869,22 @@ def page_version_list_create(request):
 
 	if request.user and request.user.is_authenticated:
 		tier = get_tier_for_book(request.user, page.book)
+		# if not tier:
+		# 	return Response(
+		# 		{
+		# 			"detail": "Pages generation is available only for paid users.",
+		# 			"pricing_tier": None,
+		# 		},
+		# 		status=status.HTTP_403_FORBIDDEN,
+		# 	)
 		has_existing_versions = PageVersion.objects.filter(page=page).exists()
+		allowance = RetryAllowance.objects.filter(
+			user=request.user,
+			content_type="PAGE",
+			content_id=page.id,
+		).first()
 		if has_existing_versions:
-			base_limit = get_tier_limit_for_book(request.user, page.book)
+			base_limit = PAGE_RETRY_BASE_LIMIT
 			allowed, allowance = consume_retry(
 				request.user,
 				"PAGE",
@@ -899,10 +914,13 @@ def page_version_list_create(request):
 			order,
 			page.page_number,
 			serializer.validated_data.get("prompt"),
+			requested_character_ids=serializer.validated_data.get("requested_character_ids"),
 		)
 		return Response(
 			{
 				**PageVersionSerializer(page_version).data,
+				"max_retries": allowance.max_retries if allowance else PAGE_RETRY_BASE_LIMIT,
+				"used_retries": allowance.used_retries if allowance else 0,
 				"pricing_tier": serialize_tier(tier),
 			},
 			status=status.HTTP_201_CREATED,
@@ -981,7 +999,10 @@ def add_retry_pack(request):
 			status=status.HTTP_400_BAD_REQUEST,
 		)
 
-	base_limit = get_tier_limit_for_book(request.user, book)
+	if content_type == "PAGE":
+		base_limit = PAGE_RETRY_BASE_LIMIT if get_tier_for_book(request.user, book) else None
+	else:
+		base_limit = get_tier_limit_for_book(request.user, book)
 	try:
 		allowance = add_extra_retries(
 			request.user,

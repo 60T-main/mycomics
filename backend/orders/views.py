@@ -223,7 +223,7 @@ def create_retry_pack_order(request):
 		tier_name="retry_pack",
 		delivery_address=None,
 		delivery_cost=0,
-		total_amount=2,
+		total_amount=1,
 		status="pending",
 	)
 
@@ -231,6 +231,8 @@ def create_retry_pack_order(request):
 		order=order,
 		content_type=content_type,
 		content_id=content_id,
+		pack_size=3,
+		pack_price_gel=1,
 	)
 
 	return Response(

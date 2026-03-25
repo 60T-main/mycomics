@@ -89,7 +89,7 @@ class RetryPackOrder(models.Model):
     content_type = models.CharField(max_length=20, choices=CONTENT_TYPES)
     content_id = models.UUIDField()
     pack_size = models.PositiveSmallIntegerField(default=3)
-    pack_price_gel = models.DecimalField(max_digits=10, decimal_places=2, default=2)
+    pack_price_gel = models.DecimalField(max_digits=10, decimal_places=2, default=1)
     consumed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -10,6 +10,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
+from ..models import Character
 from ..models import Page, PageVersion
 from billing.models import LedgerEntry
 from .call_nano_banana import call_nano_banana
@@ -36,8 +37,91 @@ def _build_thumbnail(image_file, *, max_size=(512, 512), name_prefix="page_thumb
     thumbnail_file.name = f"{name_prefix}.png"
     return thumbnail_file
 
-def generate_page(user, book, order, page_number:int, prompt:dict):
-    prompt_text = json.dumps(prompt) if isinstance(prompt, dict) else str(prompt)
+
+def _load_reference_image(image_field):
+    if not image_field:
+        return None
+
+    try:
+        image_field.open("rb")
+        with Image.open(image_field) as image:
+            return image.convert("RGB").copy()
+    except Exception:
+        return None
+    finally:
+        try:
+            image_field.close()
+        except Exception:
+            pass
+
+
+def _collect_character_references(
+    book,
+    requested_character_ids=None,
+    *,
+    max_characters=4,
+    max_photos_per_character=2,
+):
+    queryset = (
+        Character.objects.filter(book=book)
+        .prefetch_related("reference_photos")
+        .order_by("created_at")
+    )
+    characters = list(queryset)
+
+    if requested_character_ids:
+        id_set = {str(character_id) for character_id in requested_character_ids}
+        characters = [character for character in characters if str(character.id) in id_set]
+
+    characters = characters[:max_characters]
+
+    character_payload = []
+    reference_images = []
+
+    for character in characters:
+        reference_fields = [
+            photo.image for photo in character.reference_photos.all() if photo.image
+        ]
+        if not reference_fields and character.reference_photo:
+            reference_fields = [character.reference_photo]
+
+        for field in reference_fields[:max_photos_per_character]:
+            reference_image = _load_reference_image(field)
+            if reference_image is not None:
+                reference_images.append(reference_image)
+
+        character_payload.append(
+            {
+                "id": str(character.id),
+                "name": character.name,
+                "role": "main character",
+            }
+        )
+
+    return character_payload, reference_images
+
+
+def generate_page(
+    user,
+    book,
+    order,
+    page_number: int,
+    prompt: dict,
+    *,
+    requested_character_ids=None,
+):
+    prompt_text = json.dumps(prompt) if isinstance(prompt, dict) else str(prompt or "")
+    character_payload, reference_images = _collect_character_references(
+        book,
+        requested_character_ids,
+    )
+    provider_prompt_snapshot = {
+        "raw_prompt": prompt_text,
+        "genre_mood": "storybook cinematic",
+        "panel_structure": "single full-page panel",
+        "location_description": f"Children's storybook page {page_number}",
+        "characters": character_payload,
+    }
     seed = uuid.uuid4().int % 2147483647
 
     # Phase 1: create/lock page and create a GENERATING version
@@ -77,6 +161,7 @@ def generate_page(user, book, order, page_number:int, prompt:dict):
         page_version = PageVersion.objects.create(
             page=page,
             version_number=version_number,
+            prompt=prompt_text,
             seed=seed,
             status="GENERATING",
         )
@@ -88,7 +173,10 @@ def generate_page(user, book, order, page_number:int, prompt:dict):
             response_id,
             image_file,
             generation_cost_usd,
-        ) = call_nano_banana(prompt)
+        ) = call_nano_banana(
+            provider_prompt_snapshot,
+            reference_images=reference_images,
+        )
         generation_error = None
     except Exception as exc:
         generation_error = str(exc)
@@ -101,6 +189,7 @@ def generate_page(user, book, order, page_number:int, prompt:dict):
         attempt_number = version_number
 
         if generation_error:
+            page_version.prompt = prompt_text
             page_version.status = "FAILED"
             page_version.error_message = generation_error
             page_version.save()

@@ -80,7 +80,7 @@ export default function CharacterEditSection() {
   );
   const isFreeTierLimit = characterLimit === FREE_TIER_CHARACTER_LIMIT;
   const isCharacterLimitReached = characterList.length >= characterLimit;
-  const charactersDetailsRef = useRef<HTMLDetailsElement | null>(null);
+  const charactersDetailsRef = useRef<HTMLDivElement | null>(null);
   const hasInitializedCharactersRef = useRef(false);
   const previousCharactersCountRef = useRef(0);
 
@@ -459,19 +459,15 @@ export default function CharacterEditSection() {
             )}
           </form>
 
-          <details
+          <div
             ref={charactersDetailsRef}
-            open={isCharactersOpen}
-            onToggle={(event) => {
-              setIsCharactersOpen(event.currentTarget.open);
-            }}
             className="w-full max-w-3xl rounded-2xl border-2 border-neutral-200 bg-white px-4 py-3 scroll-mt-20"
           >
-            <summary className="cursor-pointer select-none font-bold">
+            <h4 className="cursor-pointer select-none font-bold">
               ჩემი პერსონაჟები ({characterList.length})
-            </summary>
+            </h4>
             <p className="text-neutral-700 text-xs md:text-sm mt-1 mb-3">
-              აქ შეგიძლია სახელის შეცვლა ან წაშლა.
+              აქ შეგიძლია სახელის შეცვლა ან პერსონაჟის წაშლა.
             </p>
 
             {characterList.length === 0 && (
@@ -570,7 +566,7 @@ export default function CharacterEditSection() {
                 </button>
               </>
             )}
-          </details>
+          </div>
         </div>
       </article>
     </section>

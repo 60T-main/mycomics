@@ -2,7 +2,18 @@
 export type ProductApiProps = {
     method: 'GET' | "POST" | "PUT" | "PATCH" | "DELETE";
     id: null | string;
-    bodyData: BookApiFieldsPost | BookApiFieldsPatch | CharacterApiFieldsPost | CharacterApiFieldsPatch | CoverVersionApiFieldsPost | FormData | null;
+    bodyData:
+        | BookApiFieldsPost
+        | BookApiFieldsPatch
+        | CharacterApiFieldsPost
+        | CharacterApiFieldsPatch
+        | CoverVersionApiFieldsPost
+        | PageApiFieldsPost
+        | PageApiFieldsPatch
+        | PageVersionApiFieldsPost
+        | PageVersionApiFieldsPatch
+        | FormData
+        | null;
     product: 'books' | 'cover' | 'cover versions' | 'characters' | 'character versions' | 'pages' | 'page versions'
     queryParams?: Record<string, string | number | boolean | null | undefined>;
 };
@@ -11,7 +22,7 @@ export type CharacterApiProps = Omit<ProductApiProps, 'bodyData'> & { bodyData: 
 
 export type CoverApiProps = Omit<ProductApiProps, 'bodyData'> & { bodyData: CharacterVersionApiFieldsPost | CharacterVersionApiFieldsPost | null };
 
-export type PageApiProps = Omit<ProductApiProps, 'bodyData'> & { bodyData: PageApiFieldsPost | PageApiFieldsPost | null };
+export type PageApiProps = Omit<ProductApiProps, 'bodyData'> & { bodyData: PageApiFieldsPost | PageApiFieldsPatch | null };
 
 // API Props END //
 
@@ -173,15 +184,10 @@ export type CoverVersionApiFieldsGet = CoverVersionBaseFields & {
 // Page types
 export type PageBaseFields = {
     book: string;
-    title_text: string;
-    prompt_snapshot: string;
-    aspect_ratio: NullableString;
-    generation_job_id: string;
-    subtitle_text: NullableString;
-    author_name: NullableString;
-    title_position: NullableString;
-    thumbnail: NullableString;
-    seed: NullableString;
+    book_id?: string;
+    page_number: number;
+    scene_description?: string;
+    text_content?: string;
 };
 
 export type PageApiFieldsPost = PageBaseFields;
@@ -190,17 +196,8 @@ export type PageApiFieldsPatch = Partial<PageBaseFields>;
 
 export type PageApiFieldsGet = PageBaseFields & {
     id: string;
-    generated_image: NullableString;
-    full_spread_image: NullableString;
-    version_number: NullableNumber;
-    ledger_entry: NullableString;
-    generation_job_id: string;
-    generation_cost_usd: NullableString;
-    status: GenerationStatus;
-    error_message: NullableString;
-    nano_request_id: NullableString;
-    created_at: string;
-    updated_at: string;
+    current_version: NullableString;
+    is_locked: boolean;
 };
 
 // Page types END
@@ -208,16 +205,10 @@ export type PageApiFieldsGet = PageBaseFields & {
 
 // Page version types
 export type PageVersionBaseFields = {
-    book: string;
-    title_text: string;
-    prompt_snapshot: string;
-    aspect_ratio: NullableString;
-    generation_job_id: string;
-    subtitle_text: NullableString;
-    author_name: NullableString;
-    title_position: NullableString;
-    thumbnail: NullableString;
-    seed: NullableString;
+    page: string;
+    prompt?: string;
+    book_id?: string;
+    requested_character_ids?: string[];
 };
 
 export type PageVersionApiFieldsPost = PageVersionBaseFields;
@@ -228,18 +219,16 @@ export type PageVersionApiFieldsGet = PageVersionBaseFields & {
     id: string;
     image: NullableString;
     thumbnail: NullableString;
-    full_spread_image: NullableString;
     version_number: NullableNumber;
     ledger_entry: NullableString;
     generation_job_id: string;
-    seed: NullableString;
+    seed: NullableNumber;
     generation_cost_usd: NullableString;
-    status: GenerationStatus;
+    status: PageGenerationStatus;
     error_message: NullableString;
     generation_time_ms: NullableNumber;
     nano_request_id: NullableString;
     created_at: string;
-    updated_at: string;
 };
 
 // Page version types END

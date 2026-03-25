@@ -79,6 +79,9 @@ const fetchProducts = async ({ method, id = null, bodyData = null, product, quer
         errorProduct = "characterApi";
         loadingProduct = "characterApi";
         setListProduct = setCharacterList;
+    } else if (product === "character versions") {
+        errorProduct = "characterVersionsApi";
+        loadingProduct = "characterVersionsApi";
     } else if (product === "cover") {
         errorProduct = "coverVersionsApi";
         loadingProduct = "coverVersionsApi";
@@ -87,6 +90,9 @@ const fetchProducts = async ({ method, id = null, bodyData = null, product, quer
         errorProduct = "pagesApi";
         loadingProduct = "pagesApi";
         setListProduct = setPageList;
+     } else if (product === "page versions") {
+        errorProduct = "pagesVersionsApi";
+        loadingProduct = "pagesVersionsApi";
      }
     
     clearError(errorProduct);
@@ -144,7 +150,14 @@ const fetchProducts = async ({ method, id = null, bodyData = null, product, quer
 
         const response = await fetch(url, requestInit);
 
-        if (!response.ok) throw new Error('Failed to fetch data');
+        if (!response.ok) {
+            let message = 'Failed to fetch data';
+            try {
+                const errorData = await response.json();
+                message = errorData?.detail || message;
+            } catch {}
+            throw new Error(message);
+        }
 
         if (response.status === 204) {
             return { ok: true };
@@ -164,7 +177,8 @@ const fetchProducts = async ({ method, id = null, bodyData = null, product, quer
         return data;
 
         } catch (error) {
-            setError(errorProduct, "Server Error, Please Come Back Later...")
+            const message = error instanceof Error ? error.message : "Server Error, Please Come Back Later...";
+            setError(errorProduct, message)
             return null;
         } finally {
             clearLoading(loadingProduct);

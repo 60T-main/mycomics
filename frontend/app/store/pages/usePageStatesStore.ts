@@ -4,12 +4,12 @@ import {PageApiFieldsGet} from "../../services/product/product-types"
 
 
 type PageStore = {
-  pageList: PageApiFieldsGet | null ;
-  setPageList: (value : PageApiFieldsGet) => void;
+  pageList: PageApiFieldsGet[];
+  setPageList: (value : PageApiFieldsGet[]) => void;
 
 };
 
 export const usePageStore = create<PageStore>((set) => ({
-  pageList: null,
+  pageList: [],
   setPageList: (value) => set(() => ({ pageList: value })),
 }));

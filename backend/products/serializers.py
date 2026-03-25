@@ -75,6 +75,12 @@ class PageSerializer(serializers.ModelSerializer):
 
 
 class PageVersionSerializer(serializers.ModelSerializer):
+    requested_character_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        write_only=True,
+    )
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # Keep preview-safe media in API responses; hide full-resolution assets.

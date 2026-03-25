@@ -11,10 +11,13 @@ from PIL import Image
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, override_settings
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from billing.models import PricingTier
 from customers.models import Customer
+from orders.models import Order, OrderItem
 
 from .models import (
 	AnonymousProfile,
@@ -426,6 +429,25 @@ class PageGenerationSecurityTests(APITestCase):
 			art_style="storybook",
 			status="DRAFT",
 		)
+		self.tier = PricingTier.objects.create(
+			name="Starter",
+			code="starter",
+			price=Decimal("9.99"),
+			currency="GEL",
+			max_retries_per_unit=3,
+		)
+		self.order = Order.objects.create(
+			customer=self.user,
+			tier_name=self.tier.code,
+			status="paid",
+			paid_at=timezone.now(),
+		)
+		OrderItem.objects.create(
+			order=self.order,
+			book=self.book,
+			quantity=1,
+			unit_price=Decimal("9.99"),
+		)
 		self.page = Page.objects.create(book=self.book, page_number=1)
 
 	def tearDown(self):
@@ -443,6 +465,12 @@ class PageGenerationSecurityTests(APITestCase):
 			content,
 			Decimal("0.2222"),
 		)
+
+	def _make_png_upload(self, name="reference.png"):
+		buffer = BytesIO()
+		Image.new("RGB", (64, 64), color=(120, 40, 40)).save(buffer, format="PNG")
+		buffer.seek(0)
+		return SimpleUploadedFile(name, buffer.getvalue(), content_type="image/png")
 
 	def test_page_generation_returns_thumbnail_and_hides_full_image(self):
 		self.client.force_authenticate(user=self.user)
@@ -490,6 +518,48 @@ class PageGenerationSecurityTests(APITestCase):
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 		self.assertEqual(len(response.data), 1)
 		self.assertEqual(response.data[0]["id"], str(owner_version.id))
+
+	def test_page_generation_uses_only_selected_character_references(self):
+		selected_character = Character.objects.create(
+			book=self.book,
+			user=self.user,
+			name="Selected Hero",
+			reference_photo=self._make_png_upload("selected-hero.png"),
+		)
+		unselected_character = Character.objects.create(
+			book=self.book,
+			user=self.user,
+			name="Hidden Hero",
+			reference_photo=self._make_png_upload("hidden-hero.png"),
+		)
+
+		self.client.force_authenticate(user=self.user)
+		url = reverse("page-version-list-create")
+
+		with patch(
+			"products.services.generate_page.call_nano_banana",
+			return_value=self._mock_generation_result(),
+		) as nano_mock:
+			response = self.client.post(
+				url,
+				{
+					"book_id": str(self.book.id),
+					"page": str(self.page.id),
+					"prompt": "hero arrives",
+					"requested_character_ids": [str(selected_character.id)],
+				},
+				format="json",
+			)
+
+		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+		nano_mock.assert_called_once()
+		self.assertIn("reference_images", nano_mock.call_args.kwargs)
+		self.assertEqual(len(nano_mock.call_args.kwargs["reference_images"]), 1)
+
+		provider_prompt = nano_mock.call_args.args[0]
+		character_ids = [str(item.get("id")) for item in provider_prompt.get("characters", [])]
+		self.assertIn(str(selected_character.id), character_ids)
+		self.assertNotIn(str(unselected_character.id), character_ids)
 
 
 class NanoBananaIntegrationUnitTests(SimpleTestCase):
